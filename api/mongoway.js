@@ -13,26 +13,27 @@ let getCollection = (docName) => {
             }
             else {
                 resolve({
-                    db,
                     collection: db.collection(docName)
                 });
             }
         });
     })
-}
+};
 
 let insertLink = (LinkUrl) => {
-    getCollection("Links").then(({db,collection}) => {
-        Promise
-    });
-    // Insert some documents 
-    collection.insertMany([
-        { a: 1 }, { a: 2 }, { a: 3 }
-    ], function (err, result) {
-        assert.equal(err, null);
-        assert.equal(3, result.result.n);
-        assert.equal(3, result.ops.length);
-        console.log("Inserted 3 documents into the document collection");
-        callback(result);
-    });
+    return getCollection(config.urls).then(({ collection }) => {
+        collection.insert({ link: LinkUrl, count: 0 }, function (err, result) {
+            if (err) {
+                reject(err);
+            }
+            else {
+                console.log(result.ops[0]._id);
+                resolve(result.ops[0]._id);
+            }
+        })
+    })
+};
+
+module.exports = {
+    insertLink: insertLink,
 }
