@@ -1,6 +1,5 @@
 "use strict"
 
-
 const MongoClient = require('mongodb').MongoClient
 const config = require('../config');
 
@@ -22,55 +21,75 @@ let getCollection = (docName) => {
 
 let insertLink = (linkUrl) => {
     return getCollection(config.urls).then(({ collection }) => {
-        collection.insert({ link: linkUrl, count: 0 }, function (err, result) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                console.log(`New Link is added. Id is ${result.ops[0]._id}.`);
-                resolve(result);
-            }
-        })
-    })
+        return new Promise((resolve, reject) => {
+            collection.insertOne({ link: linkUrl, count: 0 }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result);
+                }
+            });
+        });
+    });
 };
 
-let updateLinkById = (id, linkUrl) => {
+let updateLinkById = (id) => {
     return getCollection(config.urls).then(({ collection }) => {
-        collection.update({ _id: id }, { link: linkUrl }, function (err, result) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                console.log(`${result.ops[0]._id} is changed. New Link is ${linkUrl}`);
-                resolve(result);
-            }
+        return new Promise((resolve, reject) => {
+            collection.updateOne({ _id: id }, { link: linkUrl }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result);
+                }
+            });
         });
     });
 }
 
-let removeLinkById = (id, linkUrl) => {
+let removeLinkById = (id) => {
     return getCollection(config.urls).then(({ collection }) => {
-        collection.remove({ _id: id }, function (err, result) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                console.log(`The link which id is ${result.ops[0]._id} has disposed.`);
-                resolve(result);
-            }
+        return new Promise((resolve, reject) => {
+            collection.remove({ _id: id }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result);
+                }
+            });
         });
     });
 }
 
-let findLinkById = (id, linkUrl) => {
+let findLinkById = (id) => {
     return getCollection(config.urls).then(({ collection }) => {
-        collection.find({ _id: id }).toArray(function (err, result) {
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve(result);
-            }
+        return new Promise((resolve, reject) => {
+            collection.findOne({ _id: id }, { fields: { link: 1 } }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result);
+                }
+            });
+        });
+    });
+}
+
+let getCountById = (id) => {
+    return getCollection(config.urls).then(({ collection }) => {
+        return new Promise((resolve, reject) => {
+            collection.findOne({ _id: id }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result);
+                }
+            });
         });
     });
 }
