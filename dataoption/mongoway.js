@@ -27,7 +27,7 @@ let insertLink = (linkUrl) => {
                     reject(err);
                 }
                 else {
-                    resolve(result);
+                    resolve({ id: result.ops[0]._id });
                     db.close();
                 }
             });
@@ -70,7 +70,7 @@ let removeLinkById = (id) => {
 let getLinkById = (id) => {
     return getCollection(config.urls).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
-            collection.findOne({ _id: id }, { fields: { link: 1 } }, function (err, result) {
+            collection.findOne({ _id: id }, function (err, result) {
                 if (err) {
                     reject(err);
                 }
@@ -86,7 +86,7 @@ let getLinkById = (id) => {
 let getCountById = (id) => {
     return getCollection(config.urls).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
-            collection.findOne({ _id: id }, { fields: { count: 1 } }, function (err, result) {
+            collection.findOne({ _id: id }, function (err, result) {
                 if (err) {
                     reject(err);
                 }

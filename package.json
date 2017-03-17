@@ -2,7 +2,7 @@
   "name": "router-platform",
   "version": "1.0.0",
   "description": "route and count your link here.",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "test": "mocha ./test/ --recursive --compilers js:babel-core/register"
   },
@@ -22,6 +22,7 @@
     "mocha": "^3.2.0"
   },
   "dependencies": {
+    "body-parser": "^1.17.1",
     "express": "^4.15.2",
     "mongodb": "^2.2.24",
     "mysql": "^2.13.0"

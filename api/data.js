@@ -4,17 +4,19 @@ const config = require('../config');
 
 config.dataWay = config.dataWay || "mongodb";
 
-let operate = null;
-
-if(config.operate === "mongodb"){
-    operate = require('../dataoption/mongoway');
+let data = null;
+if (config.dataWay === "mongodb") {
+    data = require('../dataoption/mongoway');
 }
-else if(config.operate === "mysql"){
-    operate = require('../dataoption/mysqlway');
+else if (config.dataWay === "mysql") {
+    data = require('../dataoption/mysqlway');
 }
-else{
-    operate = require('../dataoption/textway');
+else {
+    data = require('../dataoption/textway');
 }
 
 
+module.exports = {
+    database: data,
+}
 

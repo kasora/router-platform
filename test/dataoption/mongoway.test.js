@@ -11,7 +11,7 @@ describe('check MongoDB.', function () {
     beforeEach(function (done) {
         assert.equal(null, id);
         mongoway.insertLink("testlink.com").then((result) => {
-            id = result.ops[0]._id;
+            id = result.id;
             done();
         });
     });
