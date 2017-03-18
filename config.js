@@ -4,4 +4,5 @@ module.exports = {
     urls : 'urls',
 
     dataWay: "mongodb",
+    log: "console",
 }
