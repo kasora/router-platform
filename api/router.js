@@ -3,6 +3,7 @@
 const express = require('express');
 const database = require('./data').database;
 const ObjectID = require('mongodb').ObjectID;
+const fs = require('fs');
 
 let router = express.Router();
 
@@ -26,6 +27,8 @@ let insertLink = (req, res) => {
             err: "Invalid link.",
         });
     }
+    if (!/^http/.test(link))
+        link = `http://` + link;
     database.insertLink(link).then((result) => {
         res.send(result);
     });
@@ -39,7 +42,8 @@ let routeLink = (req, res) => {
             });
         }
         else {
-            res.send(result);
+            res.type('html')
+            res.send(`<script>window.location.href='${result.link}';</script>`);
         }
     });
     database.addCountById(req.query._id);
