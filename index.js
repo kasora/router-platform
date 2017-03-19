@@ -27,23 +27,7 @@ app.use((req, res, next) => {
     next();
 });
 
-//check ID for MongoDB.
-app.get('/api/*', (req, res, next) => {
-    if (config.dataWay === "mongodb") {
-        try {
-            req.query._id = new ObjectID(req.query.id);
-            next();
-        } catch (err) {
-            res.status(404).send({
-                err: "Invalid ID.",
-            });
-            return;
-        }
-    }
-    else {
-        next();
-    }
-});
+
 app.use('/api', require('./api/router'));
 
 app.use('/api/route', (req, res, next) => {
