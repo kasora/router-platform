@@ -31,10 +31,31 @@ let insertLink = (req, res) => {
     });
 }
 
-let updatelink = (req, res) => {
+let updateLink = (req, res) => {
     database.updateLinkById(req.query._id, req.query.link).then((result) => {
         res.sendStatus(200);
     });
+}
+
+let removeLink = (req, res) => {
+    database.removeLinkById(req.query._id).then((result) => {
+        res.sendStatus(200);
+    });
+}
+
+
+let addUser = (req, res) => {
+    database.insertUser(req.query.userInfo).then((result) => {
+        res.status(200).send(result);
+    });
+}
+
+let getUser = (req, res) => {
+    if (req.query._id) {
+        database.getUserById(req.query._id).then((result) => {
+            
+        });
+    }
 }
 
 let routeLink = (req, res) => {
@@ -51,6 +72,8 @@ let routeLink = (req, res) => {
     });
     database.addCountById(req.query._id);
 }
+
+
 
 let replaceMongoId = (req, res, next) => {
     if (config.dataWay === "mongodb") {
@@ -69,6 +92,8 @@ let replaceMongoId = (req, res, next) => {
     }
 }
 
+
+
 // organize params
 router.use(['/link', '/route'], (req, res, next) => {
     req.query.link = req.query.link || req.body.link;
@@ -82,9 +107,14 @@ router.use(['/link', '/route'], (req, res, next) => {
     next();
 })
 router.get(['/link', '/route'], replaceMongoId);
+router.put('/link', replaceMongoId);
+router.delete('/link', replaceMongoId);
+
 router.get('/link', getLink);
 router.post('/link', insertLink);
-router.put()
+router.put('/link', updateLink);
+router.delete('/link', removeLink);
+
 router.get('/route', routeLink);
 
 module.exports = router;

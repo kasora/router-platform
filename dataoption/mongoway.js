@@ -2,6 +2,7 @@
 
 const MongoClient = require('mongodb').MongoClient
 const config = require('../config');
+const randomstring = require('randomstring');
 
 let getCollection = (docName) => {
     return new Promise((resolve, reject) => {
@@ -213,6 +214,77 @@ let removeUserById = (id) => {
                     resolve(result);
                 }
                 db.close();
+            });
+        });
+    });
+}
+
+let createToken = () => {
+    return getCollection(config.token).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            let token = randomstring.generate();
+            collection.findOne({ token: token }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else if (result) {
+                    reject('token is exist');
+                }
+                else {
+                    resolve(token);
+                }
+                db.close();
+            });
+        }).then((token) => {
+            return Promise.resolve(token);
+        }, (err) => {
+            if (err === 'token is exist') {
+                return createToken();
+            }
+        });
+    });
+}
+
+let insertToken = (id) => {
+    return createToken().then((token) => {
+        return getCollection(config.token).then(({ db, collection }) => {
+            return new Promis((resolve, reject) => {
+                collection.insertOne({
+                    uid: id,
+                    start: new Date().getTime(),
+                    dispose: new Date().setDate(new Date().getDate() + 1).getTime(),
+                    token: randomstring.generate(),
+                }, function (err, result) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve({
+                            user: result.ops[0]._id,
+                            token,
+                        });
+                    }
+                });
+            });
+        });
+    });
+}
+
+let renewToken = (token) => {
+    getCollection(config.token).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            collection.updateOne({ token: token }, {
+                $set: {
+                    dispose: new Date().setDate(new Date().getDate() + 1).getTime()
+                }, function(err, result) {
+                    if (!err) {
+                        reject(err);
+                    }
+                    else{
+                        resolve(result);
+                    }
+                    db.close();
+                }
             });
         });
     });
