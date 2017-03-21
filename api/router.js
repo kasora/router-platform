@@ -24,7 +24,7 @@ let getLink = (req, res) => {
 }
 
 let insertLink = (req, res) => {
-    
+
     if (!req.query.link) {
         return res.status(400).send({
             err: "Invalid link.",

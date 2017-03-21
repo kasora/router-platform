@@ -7,7 +7,7 @@
 |------|---|-------|----|-------|-------|------|------|
 |[√]|链接跳转|GET|/api/route|id|||guest+|
 |[X]|用户注册|POST|/api/user|email, password|name|token|guest|
-|[X]|用户登录|POST|/api/user|email, password||token|guest|
+|[X]|用户登录|GET|/api/user|email, password||token|guest|
 |[X]|用户更新|PUT|/api/user|token|name, password, email|link|owner+|
 |[X]|用户封停|DELETE|/api/user|token, email|name, password, email|link|admin|
 |[X]|用户查询|GET|/api/user|id/email||link|guest+|
