@@ -12,6 +12,6 @@
 |[X]|用户封停|DELETE|/api/user|token, email|name, password, email|link|admin|
 |[X]|用户查询|GET|/api/user|id/email||link|guest+|
 |[X]|添加链接|POST|/api/link|token, link||link|user+|
-|[X]|修改链接|PUT|/api/link|token, link||link|owner+|
+|[X]|修改链接|PUT|/api/link|token, link, new_link||link|owner+|
 |[X]|删除链接|DELETE|/api/link|token, link||empty-doc|owner+|
 |[X]|查询链接|GET|/api/link|token, link|page, per_page|link|owner+|
