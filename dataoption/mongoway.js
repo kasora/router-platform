@@ -147,7 +147,7 @@ let insertUser = (userInfo) => {
                     reject(err);
                 }
                 else {
-                    resolve({ id: result.ops[0]._id });
+                    resolve({ _id: result.ops[0]._id });
                 }
                 db.close();
             });
@@ -155,10 +155,10 @@ let insertUser = (userInfo) => {
     });
 }
 
-let getUserById = (id) => {
+let getUserById = (_id) => {
     return getCollection(config.user).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
-            collection.findOne({ id: id }, function (err, result) {
+            collection.findOne({ _id: _id }, function (err, result) {
                 if (err) {
                     reject(err);
                 }
@@ -245,13 +245,13 @@ let createToken = () => {
     });
 }
 
-let insertToken = (id) => {
+let insertToken = (_id) => {
     return createToken().then((token) => {
         return getCollection(config.token).then(({ db, collection }) => {
             return new Promis((resolve, reject) => {
                 collection.insertOne({
-                    uid: id,
-                    start: new Date().getTime(),
+                    uid: _id,
+                    create: new Date().getTime(),
                     dispose: new Date().setDate(new Date().getDate() + 1).getTime(),
                     token: randomstring.generate(),
                 }, function (err, result) {
@@ -260,7 +260,7 @@ let insertToken = (id) => {
                     }
                     else {
                         resolve({
-                            user: result.ops[0]._id,
+                            _id: result.ops[0]._id,
                             token,
                         });
                     }
@@ -280,7 +280,7 @@ let renewToken = (token) => {
                     if (!err) {
                         reject(err);
                     }
-                    else{
+                    else {
                         resolve(result);
                     }
                     db.close();
