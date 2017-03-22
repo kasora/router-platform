@@ -65,7 +65,9 @@ let addUser = (req, res) => {
     req.query.userInfo.purview = "user";
     database.insertUser(req.query.userInfo).then((result) => {
         database.insertToken(result._id).then((tokenInfo) => {
-            res.status(200).send(tokenInfo);
+            result.token = tokenInfo.token;
+            result.tokenDispose = tokenInfo.dispose;
+            res.status(201).send(result);
         });
     }, (err) => {
         console.error(err);

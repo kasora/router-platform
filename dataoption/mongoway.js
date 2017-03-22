@@ -147,7 +147,11 @@ let insertUser = (userInfo) => {
                     reject(err);
                 }
                 else {
-                    resolve({ _id: result.ops[0]._id });
+                    resolve({
+                        _id: result.ops[0]._id,
+                        email: userInfo.email,
+                        name: userInfo.name,
+                    });
                 }
                 db.close();
             });
@@ -253,15 +257,15 @@ let insertToken = (_id) => {
                     uid: _id,
                     create: new Date().getTime(),
                     dispose: new Date().setDate(new Date().getDate() + 1).getTime(),
-                    token: randomstring.generate(),
+                    token: token,
                 }, function (err, result) {
                     if (err) {
                         reject(err);
                     }
                     else {
                         resolve({
-                            _id: result.ops[0]._id,
                             token,
+                            dispose: result.ops[0].dispose,
                         });
                     }
                 });
