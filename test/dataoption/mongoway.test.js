@@ -8,11 +8,10 @@ let MongoClient = require('mongodb').MongoClient;
 
 describe('check MongoDB.', function () {
     let id = null;
-    beforeEach(function (done) {
+    it('insert link', function () {
         assert.equal(null, id);
-        mongoway.insertLink("testlink.com").then((result) => {
+        return mongoway.insertLink("testlink.com").then((result) => {
             id = result.id;
-            done();
         });
     });
 
@@ -35,24 +34,24 @@ describe('check MongoDB.', function () {
     it('count test.', function () {
         assert.ok(id);
         return mongoway.setCountById(id, 20).then(() => {
-            return mongoway.getCountById(id).then((result)=>{
-                assert.equal(20,result.count);
+            return mongoway.getCountById(id).then((result) => {
+                assert.equal(20, result.count);
             });
-        }).then(()=>{
-            return mongoway.addCountById(id).then(()=>{
-                return mongoway.getCountById(id).then((result)=>{
-                    assert.equal(21,result.count);
+        }).then(() => {
+            return mongoway.addCountById(id).then(() => {
+                return mongoway.getCountById(id).then((result) => {
+                    assert.equal(21, result.count);
                 });
             });
         });
     });
 
-    afterEach(function () {
+    it('delete link.', function () {
         assert.ok(id);
         return mongoway.removeLinkById(id).then(() => {
-            return mongoway.getLinkById(id).then((result)=>{
+            return mongoway.getLinkById(id).then((result) => {
                 id = null;
-                assert.equal(null,result);
+                assert.equal(null, result);
             });
         });
     });

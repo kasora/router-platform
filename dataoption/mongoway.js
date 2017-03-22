@@ -140,7 +140,7 @@ let checkEmail = (email) => {
 }
 
 let insertUser = (userInfo) => {
-    getCollection(config.user).then(({ db, collection }) => {
+    return getCollection(config.user).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
             collection.insertOne(userInfo, function (err, result) {
                 if (err) {
@@ -252,11 +252,15 @@ let createToken = () => {
 let insertToken = (_id) => {
     return createToken().then((token) => {
         return getCollection(config.token).then(({ db, collection }) => {
-            return new Promis((resolve, reject) => {
+            return new Promise((resolve, reject) => {
+                let now = new Date();
+                let dispose = new Date();
+                dispose.setDate(dispose.getDate() + config.disposeTime);
+
                 collection.insertOne({
                     uid: _id,
-                    create: new Date().getTime(),
-                    dispose: new Date().setDate(new Date().getDate() + 1).getTime(),
+                    create: now.getTime(),
+                    dispose: dispose.getTime(),
                     token: token,
                 }, function (err, result) {
                     if (err) {
@@ -295,17 +299,18 @@ let renewToken = (token) => {
 }
 
 module.exports = {
-    insertLink: insertLink,
-    updateLinkById: updateLinkById,
-    removeLinkById: removeLinkById,
-    getLinkById: getLinkById,
-    getCountById: getCountById,
-    setCountById: setCountById,
-    addCountById: addCountById,
-    insertUser: insertUser,
-    checkEmail: checkEmail,
-    getUserById: getUserById,
-    getUserByEmail: getUserByEmail,
-    updateUserById: updateUserById,
-    removeUserById: removeUserById,
+    insertLink,
+    updateLinkById,
+    removeLinkById,
+    getLinkById,
+    getCountById,
+    setCountById,
+    addCountById,
+    insertUser,
+    checkEmail,
+    getUserById,
+    getUserByEmail,
+    updateUserById,
+    removeUserById,
+    insertToken,
 }

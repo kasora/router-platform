@@ -62,12 +62,22 @@ let login = (req, res) => {
 }
 
 let addUser = (req, res) => {
-    req.query.userInfo.purview = "user";
-    database.insertUser(req.query.userInfo).then((result) => {
-        database.insertToken(result._id).then((tokenInfo) => {
+    let userInfo = {
+        name: req.query.name,
+        email: req.query.email,
+        password: req.query.password,
+        purview: "user",
+    }
+
+    database.insertUser(userInfo).then((result) => {
+        return database.insertToken(result._id).then((tokenInfo) => {
             result.token = tokenInfo.token;
             result.tokenDispose = tokenInfo.dispose;
+            res.type('application/json');
             res.status(201).send(result);
+        }, (err) => {
+            console.error(err);
+            res.sendStatus(500);
         });
     }, (err) => {
         console.error(err);
@@ -148,14 +158,17 @@ router.use(['/link', '/route'], (req, res, next) => {
     }
     next();
 })
-route.use('/user', (req, res, next) => {
-    req.query.userInfo = req.query.userInfo || req.body.userInfo;
-    req.query.id = req.query.id || req.body.id;
+router.use('/user', (req, res, next) => {
+    req.query.email = req.query.email || req.body.email;
+    req.query.password = req.query.password || req.body.password;
+    req.query.name = req.query.name || req.body.name;
+    req.query.token = req.query.token || req.body.token;
+    next();
 });
 
 // check userinfo
-route.post('/user', (req, res, next) => {
-    if (!req.query.userInfo.email || !req.query.userInfo.password) {
+router.post('/user', (req, res, next) => {
+    if (!req.query.email || !req.query.password) {
         res.sendStatus(400);
         return;
     }
@@ -166,7 +179,7 @@ route.post('/user', (req, res, next) => {
 });
 
 
-route.use('/user', replaceMongoId);
+router.use('/user', replaceMongoId);
 router.get(['/link', '/route'], replaceMongoId);
 router.put('/link', replaceMongoId);
 router.delete('/link', replaceMongoId);
@@ -176,7 +189,7 @@ router.post('/link', insertLink);
 router.put('/link', updateLink);
 router.delete('/link', removeLink);
 
-route.post('/user', addUser);
+router.post('/user', addUser);
 
 router.get('/route', routeLink);
 

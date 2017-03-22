@@ -7,4 +7,6 @@ module.exports = {
 
     dataWay: "mongodb",
     log: "console",
+
+    disposeTime: 5,
 }
