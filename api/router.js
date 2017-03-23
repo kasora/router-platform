@@ -65,13 +65,13 @@ let login = (req, res) => {
     }
 
     database.getUserByEmail(userInfo.email).then((userResult) => {
-        return database.getToken(userResult._id).then((tokenResult) => {
-            return database.removeToken(userResult._id).then(() => {
-                return database.insertToken(userResult._id).then((newToken) => {
+        database.getTokenByUid(userResult._id).then((tokenResult) => {
+            database.removeToken(userResult._id).then(() => {
+                database.insertToken(userResult._id).then((newToken) => {
                     userResult.token = newToken.token;
                     userResult.tokenDispose = newToken.dispose;
                     res.type('application/json');
-                    res.status(201).send(result);
+                    res.status(201).send(userResult);
                 });
             });
         });
@@ -93,6 +93,7 @@ let addUser = (req, res) => {
         database.insertToken(result._id).then((tokenInfo) => {
             result.token = tokenInfo.token;
             result.tokenDispose = tokenInfo.dispose;
+            result.purview = "user";
             res.type('application/json');
             res.status(201).send(result);
         }, (err) => {
@@ -165,7 +166,7 @@ let replaceMongoId = (req, res, next) => {
 }
 
 let checkEmail = (req, res, next) => {
-    getUserByEmail(req.query.email).then((result) => {
+    database.getUserByEmail(req.query.email).then((result) => {
         if (result) {
             res.status(400).send({ err: 'Email is exist.' });
         }
@@ -241,7 +242,6 @@ router.post('/user', (req, res, next) => {
     next();
 });
 router.use('/link', checkToken);
-router.post('/user', checkToken);
 router.put('/user', checkToken);
 router.delete('/user', checkToken);
 
