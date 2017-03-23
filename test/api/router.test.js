@@ -90,5 +90,7 @@ describe('check user part.', () => {
                 }
             }
         });
-    })
+    });
+
+    it('user remove.')
 });
