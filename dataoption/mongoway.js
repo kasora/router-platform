@@ -122,22 +122,7 @@ let addCountById = (id) => {
     });
 }
 
-let checkEmail = (email) => {
-    getCollection(config.user).then(({ db, collection }) => {
-        return new Promise((resolve, reject) => {
-            collection.findOne({ email: email }, function (err, result) {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    if (!result) resolve('You can use this Email.');
-                    else reject('Email is exist.');
-                }
-                db.close();
-            })
-        });
-    });
-}
+
 
 let insertUser = (userInfo) => {
     return getCollection(config.user).then(({ db, collection }) => {
@@ -184,6 +169,22 @@ let getUserByEmail = (email) => {
                 }
                 else {
                     resolve(result);
+                }
+                db.close();
+            });
+        });
+    });
+}
+
+let getUidByToken = (token) => {
+    return getCollection(config.token).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            collection.findOne({ token }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result._uid);
                 }
                 db.close();
             });
@@ -249,16 +250,16 @@ let createToken = () => {
     });
 }
 
-let insertToken = (_id) => {
+let insertToken = (_uid) => {
     return createToken().then((token) => {
         return getCollection(config.token).then(({ db, collection }) => {
             return new Promise((resolve, reject) => {
                 let now = new Date();
                 let dispose = new Date();
-                dispose.setDate(dispose.getDate() + config.disposeTime);
+                dispose.setDate(dispose.getDate() + config.renewTime);
 
                 collection.insertOne({
-                    uid: _id,
+                    _uid,
                     create: now.getTime(),
                     dispose: dispose.getTime(),
                     token: token,
@@ -268,6 +269,7 @@ let insertToken = (_id) => {
                     }
                     else {
                         resolve({
+                            _id: result.ops[0]._id,
                             token,
                             dispose: result.ops[0].dispose,
                         });
@@ -278,14 +280,32 @@ let insertToken = (_id) => {
     });
 }
 
-let renewToken = (token) => {
-    getCollection(config.token).then(({ db, collection }) => {
+let removeToken = (_uid) => {
+    return getCollection(config.token).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
-            collection.updateOne({ token: token }, {
+            collection.remove({ _uid }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result);
+                }
+                db.close();
+            });
+        });
+    });
+}
+
+let renewToken = (_uid) => {
+    return getCollection(config.token).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            let dispose = new Date();
+            dispose.setDate(dispose.getDate() + config.renewTime);
+            collection.updateOne({ _uid }, {
                 $set: {
-                    dispose: new Date().setDate(new Date().getDate() + 1).getTime()
+                    dispose: dispose.getTime(),
                 }, function(err, result) {
-                    if (!err) {
+                    if (err) {
                         reject(err);
                     }
                     else {
@@ -298,19 +318,58 @@ let renewToken = (token) => {
     });
 }
 
+let getTokenByUid = (_uid) => {
+    return getCollection(config.token).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            collection.findOne({ _uid }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result);
+                }
+            });
+        });
+    });
+}
+
+let getTokenByToken = (token) => {
+    return getCollection(config.token).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            collection.findOne({ token }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result);
+                }
+            });
+        });
+    });
+}
+
+
+
 module.exports = {
     insertLink,
     updateLinkById,
     removeLinkById,
     getLinkById,
+
     getCountById,
     setCountById,
     addCountById,
+
     insertUser,
-    checkEmail,
     getUserById,
     getUserByEmail,
     updateUserById,
     removeUserById,
+
+    createToken,
     insertToken,
+    removeToken,
+    renewToken,
+    getTokenByUid,
+    getTokenByToken,
 }

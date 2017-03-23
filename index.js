@@ -11,6 +11,10 @@ let router = express.Router();
 let app = express();
 
 
+app.use('/checkService',(req,res)=>{
+    res.sendStatus(200);
+})
+
 //print log.  --TODO
 app.use((req, res, next) => {
     if (config.log === "console") {

@@ -8,5 +8,6 @@ module.exports = {
     dataWay: "mongodb",
     log: "console",
 
-    disposeTime: 5,
+    disposeTime: 15,
+    renewTime: 1
 }

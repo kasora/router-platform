@@ -3,6 +3,7 @@
 const express = require('express');
 const database = require('./data').database;
 const ObjectID = require('mongodb').ObjectID;
+const config = require('../config');
 const fs = require('fs');
 
 let router = express.Router();
@@ -58,7 +59,26 @@ let removeLink = (req, res) => {
 
 
 let login = (req, res) => {
+    let userInfo = {
+        email: req.query.email,
+        password: req.query.password,
+    }
 
+    database.getUserByEmail(userInfo.email).then((userResult) => {
+        return database.getToken(userResult._id).then((tokenResult) => {
+            return database.removeToken(userResult._id).then(() => {
+                return database.insertToken(userResult._id).then((newToken) => {
+                    userResult.token = newToken.token;
+                    userResult.tokenDispose = newToken.dispose;
+                    res.type('application/json');
+                    res.status(201).send(result);
+                });
+            });
+        });
+    }, (err) => {
+        console.error(err);
+        res.status(500).send({ err: "database error." });
+    });
 }
 
 let addUser = (req, res) => {
@@ -70,18 +90,18 @@ let addUser = (req, res) => {
     }
 
     database.insertUser(userInfo).then((result) => {
-        return database.insertToken(result._id).then((tokenInfo) => {
+        database.insertToken(result._id).then((tokenInfo) => {
             result.token = tokenInfo.token;
             result.tokenDispose = tokenInfo.dispose;
             res.type('application/json');
             res.status(201).send(result);
         }, (err) => {
             console.error(err);
-            res.sendStatus(500);
+            res.status(500).send({ err: "database error." });
         });
     }, (err) => {
         console.error(err);
-        res.sendStatus(500);
+        res.status(500).send({ err: "database error." });
     });
 }
 
@@ -144,6 +164,43 @@ let replaceMongoId = (req, res, next) => {
     }
 }
 
+let checkEmail = (req, res, next) => {
+    getUserByEmail(req.query.email).then((result) => {
+        if (result) {
+            res.status(400).send({ err: 'Email is exist.' });
+        }
+        else {
+            next();
+        }
+    }, (err) => {
+        res.status(500).send({ err: "database error." });
+    });
+}
+
+let checkToken = (req, res, next) => {
+    if(!req.query.token){
+        res.status(401).send({ err: "token isn't exist." });
+        return;
+    }
+    database.getToken(req.query.token).then((tokenResult) => {
+        if(!tokenResult){
+            res.status(401).send({ err: "token isn't exist." });
+            return;
+        }
+        let now = new Date();
+        if ((now.getTime() > tokenResult.dispose) ||
+            (now.getTime() - tokenResult.create > config.disposeTime * 24 * 60 * 60 * 1000)) {
+            res.status(401).send({ err: "token is invalid." });
+            return;
+        }
+        else {
+            next();
+        }
+    }, (err) => {
+        res.status(500).send({ err: "database error." });
+        return;
+    });
+}
 
 
 // organize params
@@ -158,7 +215,7 @@ router.use(['/link', '/route'], (req, res, next) => {
     }
     next();
 })
-router.use('/user', (req, res, next) => {
+router.use(['/user', '/login'], (req, res, next) => {
     req.query.email = req.query.email || req.body.email;
     req.query.password = req.query.password || req.body.password;
     req.query.name = req.query.name || req.body.name;
@@ -167,16 +224,27 @@ router.use('/user', (req, res, next) => {
 });
 
 // check userinfo
-router.post('/user', (req, res, next) => {
+router.post('/user', checkEmail);
+router.post(['/user', '/login'], (req, res, next) => {
     if (!req.query.email || !req.query.password) {
-        res.sendStatus(400);
+        res.status(400).send({
+            err: "you have to provide email and password."
+        });
         return;
     }
+    next();
+});
+router.post('/user', (req, res, next) => {
     if (!req.query.name) {
         req.query.name = 'unknown';
     }
     next();
 });
+router.use('/link', checkToken);
+router.post('/user', checkToken);
+router.put('/user', checkToken);
+router.delete('/user', checkToken);
+
 
 
 router.use('/user', replaceMongoId);
@@ -190,6 +258,7 @@ router.put('/link', updateLink);
 router.delete('/link', removeLink);
 
 router.post('/user', addUser);
+router.post('/login', login);
 
 router.get('/route', routeLink);
 
