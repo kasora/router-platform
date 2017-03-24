@@ -8,6 +8,9 @@ module.exports = {
     dataWay: "mongodb",
     log: "console",
 
+    adminEamil: "test@test.com",
+    adminPassword: "testpassword",
+    
     disposeTime: 15,
     renewTime: 1
 }

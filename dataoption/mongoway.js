@@ -127,7 +127,12 @@ let addCountById = (id) => {
 let insertUser = (userInfo) => {
     return getCollection(config.user).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
-            collection.insertOne(userInfo, function (err, result) {
+            collection.insertOne({
+                name: userInfo.name,
+                email: userInfo.email,
+                password: userInfo.password,
+                purview: "user",
+            }, function (err, result) {
                 if (err) {
                     reject(err);
                 }
@@ -136,6 +141,7 @@ let insertUser = (userInfo) => {
                         _id: result.ops[0]._id,
                         email: userInfo.email,
                         name: userInfo.name,
+                        purview: "user",
                     });
                 }
                 db.close();
@@ -152,7 +158,12 @@ let getUserById = (_id) => {
                     reject(err);
                 }
                 else {
-                    resolve(result);
+                    resolve({
+                        _id: result._id,
+                        email: result.email,
+                        name: result.name,
+                        purview: result.purview,
+                    });
                 }
                 db.close();
             });
@@ -195,7 +206,12 @@ let getUidByToken = (token) => {
 let updateUserById = (id, userInfo) => {
     return getCollection(config.user).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
-            collection.updateOne({ _id: id }, { $set: userInfo }, function (err, result) {
+            collection.updateOne({ _id: id }, {
+                $set: {
+                    name: userInfo.name,
+                    password: userInfo.password,
+                }
+            }, function (err, result) {
                 if (err) {
                     reject(err);
                 }
@@ -220,6 +236,28 @@ let removeUserById = (id) => {
                 }
                 db.close();
             });
+        });
+    });
+}
+
+let checkPassword = (email, password) => {
+    return getCollection(config.user).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            collection.findOne({ email }, function (err, result) {
+                if (err) {
+                    reject("database error.");
+                }
+                else if (result === null) {
+                    reject("user not exist.");
+                }
+                else if (result.password === password) {
+                    resolve("pass.");
+                }
+                else {
+                    reject("wrong password.");
+                }
+            });
+            db.close();
         });
     });
 }
@@ -349,6 +387,24 @@ let getTokenByToken = (token) => {
 }
 
 
+let setAdmin = (email) => {
+    return getCollection(config.user).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            collection.updateOne({ email }, { $set: { purview: "admin" } }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else if (result.n === 1) {
+                    resolve("ok");
+                }
+                else {
+                    reject("database error.");
+                }
+            });
+        });
+    });
+}
+
 
 module.exports = {
     insertLink,
@@ -366,10 +422,14 @@ module.exports = {
     updateUserById,
     removeUserById,
 
+    checkPassword,
+
     createToken,
     insertToken,
     removeToken,
     renewToken,
     getTokenByUid,
     getTokenByToken,
+
+    setAdmin,
 }

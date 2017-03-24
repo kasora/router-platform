@@ -8,6 +8,9 @@ module.exports = {
     dataWay: "mongodb",
     log: "console",
 
+    adminEamil: "i@kasora.moe",
+    adminPassword: "testadmin",
+
     disposeTime: 15,
     renewTime: 1
 }

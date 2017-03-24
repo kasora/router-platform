@@ -65,15 +65,24 @@ let login = (req, res) => {
     }
 
     database.getUserByEmail(userInfo.email).then((userResult) => {
-        database.getTokenByUid(userResult._id).then((tokenResult) => {
-            database.removeToken(userResult._id).then(() => {
-                database.insertToken(userResult._id).then((newToken) => {
-                    userResult.token = newToken.token;
-                    userResult.tokenDispose = newToken.dispose;
-                    res.type('application/json');
-                    res.status(201).send(userResult);
+        database.checkPassword(userInfo.email, userInfo.password).then(() => {
+            database.getTokenByUid(userResult._id).then((tokenResult) => {
+                database.removeToken(userResult._id).then(() => {
+                    database.insertToken(userResult._id).then((newToken) => {
+                        userResult.token = newToken.token;
+                        userResult.tokenDispose = newToken.dispose;
+                        res.type('application/json');
+                        res.status(201).send(userResult);
+                    });
                 });
             });
+        }, (err) => {
+            if (err !== "database error.") {
+                res.status(401).send({ err });
+            }
+            else {
+                res.status(500).send({ err });
+            }
         });
     }, (err) => {
         console.error(err);
@@ -179,12 +188,12 @@ let checkEmail = (req, res, next) => {
 }
 
 let checkToken = (req, res, next) => {
-    if(!req.query.token){
+    if (!req.query.token) {
         res.status(401).send({ err: "token isn't exist." });
         return;
     }
     database.getToken(req.query.token).then((tokenResult) => {
-        if(!tokenResult){
+        if (!tokenResult) {
             res.status(401).send({ err: "token isn't exist." });
             return;
         }

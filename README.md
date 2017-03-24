@@ -16,4 +16,4 @@
 |[X]|修改链接|PUT|/api/link|token, link, new_link||link|owner+|
 |[X]|删除链接|DELETE|/api/link|token, link||empty-doc|owner+|
 
-userInfo: name, email, _id, token, tokenDispose
+userInfo: name, email, _id, token, tokenDispose, purview
