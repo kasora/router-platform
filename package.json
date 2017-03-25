@@ -4,7 +4,7 @@
   "description": "route and count your link here.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha ./test/ --recursive --bail --compilers js:babel-core/register"
+    "test": "mocha ./test/ --recursive --compilers js:babel-core/register"
   },
   "repository": {
     "type": "git",

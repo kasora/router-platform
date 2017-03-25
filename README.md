@@ -7,10 +7,10 @@
 |------|---|-------|----|-------|-------|------|------|
 |[√]|链接跳转|GET|/api/route|id|||guest+|
 |[√]|用户登录|POST|/api/login|email, password||userInfo|guest|
-|[X]|用户查询|GET|/api/user|id/email||name, email|guest+|
+|[√]|用户查询|GET|/api/user|id/email||name, email|guest+|
 |[√]|用户注册|POST|/api/user|email, password|name|userInfo|guest|
-|[X]|用户更新|PUT|/api/user|token|name, password, email|link|owner+|
-|[X]|用户封停|DELETE|/api/user|token, email||link|admin|
+|[√]|用户更新|PUT|/api/user|token, email|name, password|link|owner+|
+|[√]|用户封停|DELETE|/api/user|token, email||link|admin|
 |[X]|查询链接|GET|/api/link|token, link|page, per_page|link|owner+|
 |[X]|添加链接|POST|/api/link|token, link||link|user+|
 |[X]|修改链接|PUT|/api/link|token, link, new_link||link|owner+|
