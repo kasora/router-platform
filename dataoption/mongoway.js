@@ -378,7 +378,7 @@ let removeToken = (_uid) => {
         });
     });
 }
-let renewToken = (_uid) => {
+let renewTokenByUid = (_uid) => {
     return getCollection(config.token).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
             let dispose = new Date();
@@ -386,15 +386,42 @@ let renewToken = (_uid) => {
             collection.updateOne({ _uid }, {
                 $set: {
                     dispose: dispose.getTime(),
-                }, function(err, result) {
-                    if (err) {
-                        reject(err);
-                    }
-                    else {
-                        resolve(result);
-                    }
-                    db.close();
                 }
+            }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else if (result.result.n === 1) {
+                    resolve(result);
+                }
+                else {
+                    reject("database error.");
+                }
+                db.close();
+            });
+        });
+    });
+}
+let renewTokenByToken = (token) => {
+    return getCollection(config.token).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            let dispose = new Date();
+            dispose.setDate(dispose.getDate() + config.renewTime);
+            collection.updateOne({ token }, {
+                $set: {
+                    dispose: dispose.getTime(),
+                }
+            }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else if (result.result.n === 1) {
+                    resolve(result);
+                }
+                else {
+                    reject("database error.");
+                }
+                db.close();
             });
         });
     });
@@ -484,7 +511,8 @@ module.exports = {
     createToken,
     insertToken,
     removeToken,
-    renewToken,
+    renewTokenByUid,
+    renewTokenByToken,
     getTokenByUid,
     getTokenByToken,
 

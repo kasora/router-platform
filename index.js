@@ -36,9 +36,5 @@ app.use('/api/link', (req, res, next) => {
 });
 app.use('/api', require('./api/router'));
 
-app.use('/api/route', (req, res, next) => {
-
-})
-
 app.listen(config.port);
 console.log(`Service started at port ${config.port}.`);

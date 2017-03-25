@@ -10,8 +10,13 @@ describe('check MongoDB.', function () {
     let id = null;
     it('insert link', function () {
         assert.equal(null, id);
-        return mongoway.insertLink("testlink.com").then((result) => {
-            id = result._id;
+        return new Promise((resolve, reject) => {
+            return mongoway.insertLink("testlink.com").then((result) => {
+                id = result._id;
+                resolve();
+            },()=>{
+                reject("database error.");
+            });
         });
     });
 

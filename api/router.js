@@ -34,7 +34,7 @@ let replaceMongoId = (req, res, next) => {
 let checkEmail = (req, res, next) => {
     database.getUserByEmail(req.query.email).then((result) => {
         if (result) {
-            res.status(400).send({ err: 'userinfo error.' });
+            res.status(400).send({ err: 'email error.' });
         }
     }, (err) => {
         if (err === "user error.") {
@@ -55,19 +55,37 @@ let checkToken = (req, res, next) => {
             res.status(401).send({ err: "token error." });
             return;
         }
-        let now = new Date();
-        if ((now.getTime() > tokenResult.dispose) ||
-            (now.getTime() - tokenResult.create > config.disposeTime * 24 * 60 * 60 * 1000)) {
-            res.status(401).send({ err: "token error." });
-            return;
-        }
-        else {
-            next();
-        }
+        req.query._id = tokenResult._uid;
+        next();
     }, (err) => {
         res.status(500).send({ err: "database error." });
         return;
     });
+}
+let updateToken = (req, res, next) => {
+    if (req.query.token !== undefined) {
+        database.getTokenByToken(req.query.token).then((tokenResult) => {
+            let now = new Date();
+            if ((now.getTime() > tokenResult.dispose) ||
+                (now.getTime() - tokenResult.create > config.disposeTime * 24 * 60 * 60 * 1000)) {
+                res.status(401).send({ err: "token error." });
+                return;
+            }
+            else {
+                database.renewTokenByToken(req.query.token).then((result) => {
+                    next();
+                }, (err) => {
+                    res.status(500).send({ err: "database error." })
+                });
+                return;
+            }
+        }, (err) => {
+            res.status(500).send({ err: "database error." });
+        });
+    }
+    else {
+        next();
+    }
 }
 let checkAdmin = (req, res, next) => {
     if (req.query.token === undefined) {
@@ -152,7 +170,7 @@ let insertLink = (req, res) => {
 
     if (!req.query.link) {
         return res.status(400).send({
-            err: "Invalid link.",
+            err: "link error.",
         });
     }
     database.insertLink(req.query.link).then((result) => {
@@ -163,23 +181,25 @@ let insertLink = (req, res) => {
 }
 let removeLink = (req, res) => {
     database.removeLinkById(req.query._id).then((result) => {
-        res.sendStatus(204);
+        res.status(204).send({});
     }, (err) => {
-        res.sendStatus(500);
+        res.status(500).send({ err: "database error." });
     });
 }
 let updateLink = (req, res) => {
     database.updateLinkById(req.query._id, req.query.link).then((result) => {
-        res.sendStatus(201);
+        database.getLinkById(req.query._id).then((linkResult) => {
+            res.status(201).send(linkResult);
+        });
     }, (err) => {
-        res.sendStatus(500);
+        res.status(500).send({ err: "database error." });
     });
 }
 let getLink = (req, res) => {
     database.getLinkById(req.query._id).then((result) => {
         if (!result) {
             res.status(404).send({
-                err: "Invalid ID.",
+                err: "id error.",
             });
         }
         else {
@@ -354,40 +374,33 @@ router.use(['/user', '/login'], (req, res, next) => {
     next();
 });
 
-// check userinfo
+router.use(replaceMongoId);
+router.use(updateToken);
+
 router.post('/user', checkUserInfo);
-router.get('login', checkUserInfo)
 router.post('/user', (req, res, next) => {
     if (!req.query.name) {
         req.query.name = 'unknown';
     }
     next();
 });
-
-router.put('/user', checkPrivate);
-router.delete('/user',checkPrivate);
-
 router.post('/user', checkEmail);
+router.delete('/user', checkPrivate);
+router.put('/user', checkPrivate);
+
 router.get('/login', checkPassword);
-
-
-router.put('/user', checkToken);
-router.delete('/user', checkToken);
-router.use('/link', checkToken);
-
-//replace to mongoid
-router.use('/user', replaceMongoId);
-router.get(['/link', '/route'], replaceMongoId);
-router.put('/link', replaceMongoId);
-router.delete('/link', replaceMongoId);
-
-
-router.get('/link', getLink);
-router.post('/link', insertLink);
-router.put('/link', updateLink);
-router.delete('/link', removeLink);
-
+router.get('login', checkUserInfo)
 router.get('/login', login);
+
+router.post('/link', checkToken);
+router.put('/link', checkToken);
+router.delete('/link', checkToken);
+
+
+router.post('/link', insertLink);
+router.delete('/link', removeLink);
+router.put('/link', updateLink);
+router.get('/link', getLink);
 
 router.post('/user', addUser);
 router.delete('/user', removeUser);

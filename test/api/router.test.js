@@ -281,8 +281,11 @@ describe('check user part.', () => {
     it('fake admin sign up.', function () {
         return signup(fakeadmin).then((result) => {
             assert(result.purview === "user");
-            return login(fakeadmin);
         });
+    });
+
+    it('fake admin login.',function(){
+        return login(fakeadmin);
     });
 
     it('fake admin test remove.', function () {
@@ -330,9 +333,12 @@ describe('check user part.', () => {
     });
 
     after(function () {
-        remove(adminInfo, guestInfo);
-        remove(adminInfo, wrongInfo);
-        remove(fakeadmin, fakeadmin);
-        remove(adminInfo, adminInfo);
+        return new Promise((resolve, reject) => {
+            remove(adminInfo, guestInfo);
+            remove(adminInfo, wrongInfo);
+            remove(fakeadmin, fakeadmin);
+            remove(adminInfo, adminInfo);
+            resolve();
+        });
     })
 });
