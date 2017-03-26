@@ -67,7 +67,7 @@ let getPasswordByEmail = (email) => {
                     reject("database error.");
                 }
                 else if (result === null) {
-                    reject("user not exist.");
+                    reject("userinfo error.");
                 }
                 else {
                     resolve(result.password);
@@ -236,11 +236,8 @@ let removeUserById = (id) => {
                 if (err) {
                     reject(err);
                 }
-                else if (result.result.n === 1) {
-                    resolve(result);
-                }
                 else {
-                    reject("user not exist.")
+                    resolve(result);
                 }
                 db.close();
             });
@@ -254,11 +251,8 @@ let removeUserByEmail = (email) => {
                 if (err) {
                     reject(err);
                 }
-                else if (result.result.ok === 1) {
-                    resolve(result);
-                }
                 else {
-                    reject("database error.")
+                    resolve(result);
                 }
                 db.close();
             });
@@ -336,7 +330,7 @@ let getUserByEmail = (email) => {
                     reject(err);
                 }
                 else if (result === null) {
-                    reject("user error.");
+                    reject("userinfo error.");
                 }
                 else {
                     resolve({
@@ -495,7 +489,7 @@ let setAdmin = (email) => {
                 if (err) {
                     reject(err);
                 }
-                else if (result.result.n === 1) {
+                else if (result.result.ok === 1) {
                     resolve("ok");
                 }
                 else {

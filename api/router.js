@@ -38,13 +38,43 @@ let replaceMongoId = (req, res, next) => {
     }
     next();
 }
+let updateToken = (req, res, next) => {
+    if (req.query.token !== undefined) {
+        database.getTokenByToken(req.query.token).then((tokenResult) => {
+            let now = new Date();
+            if ((now.getTime() > tokenResult.dispose) ||
+                (now.getTime() - tokenResult.create > config.disposeTime * 24 * 60 * 60 * 1000)) {
+                res.status(401).send({ err: "token error." });
+                return;
+            }
+            else {
+                database.renewTokenByToken(req.query.token).then((result) => {
+                    next();
+                }, (err) => {
+                    res.status(500).send({ err: "database error." })
+                });
+                return;
+            }
+        }, (err) => {
+            if (err === "token error.") {
+                res.status(401).send({ err });
+            }
+            else {
+                res.status(500).send({ err: "database error." });
+            }
+        });
+    }
+    else {
+        next();
+    }
+}
 let checkEmail = (req, res, next) => {
     database.getUserByEmail(req.query.email).then((result) => {
         if (result) {
             res.status(400).send({ err: 'email error.' });
         }
     }, (err) => {
-        if (err === "user error.") {
+        if (err === "userinfo error.") {
             next();
         }
         else {
@@ -68,31 +98,6 @@ let checkToken = (req, res, next) => {
         res.status(500).send({ err: "database error." });
         return;
     });
-}
-let updateToken = (req, res, next) => {
-    if (req.query.token !== undefined) {
-        database.getTokenByToken(req.query.token).then((tokenResult) => {
-            let now = new Date();
-            if ((now.getTime() > tokenResult.dispose) ||
-                (now.getTime() - tokenResult.create > config.disposeTime * 24 * 60 * 60 * 1000)) {
-                res.status(401).send({ err: "token error." });
-                return;
-            }
-            else {
-                database.renewTokenByToken(req.query.token).then((result) => {
-                    next();
-                }, (err) => {
-                    res.status(500).send({ err: "database error." })
-                });
-                return;
-            }
-        }, (err) => {
-            res.status(500).send({ err: "database error." });
-        });
-    }
-    else {
-        next();
-    }
 }
 let checkAdmin = (req, res, next) => {
     if (req.query.token === undefined) {
@@ -161,7 +166,12 @@ let checkPrivate = (req, res, next) => {
                 }
             }
         }, (err) => {
-            res.status(500).send({ err: "database error." });
+            if (err === "user error.") {
+                res.status(401).send({ err: "token error." });
+            }
+            else {
+                res.status(500).send({ err: "database error." });
+            }
         });
     }, (err) => {
         if (err === "token error.") {
@@ -200,8 +210,11 @@ let removeLink = (req, res) => {
     });
 }
 let updateLink = (req, res) => {
-    database.updateLinkById(req.query._linkid, req.query.link).then((result) => {
-        database.getLinkById(req.query._linkid).then((linkResult) => {
+    database.getLinkById(req.query._linkid).then((linkResult) => {
+        if (linkResult._uid !== req.query._uid) {
+            res.status(401).send({ err: "purview error." });
+        }
+        database.updateLinkById(req.query._linkid, req.query.newlink).then((result) => {
             res.status(201).send(linkResult);
         });
     }, (err) => {
@@ -211,6 +224,7 @@ let updateLink = (req, res) => {
 let getLink = (req, res) => {
     req.query.page = req.query.page || 0;
     req.query.per_page = req.query.per_page || 20;
+    req.query.per_page = req.query.per_page > 100 ? 100 : req.query.per_page;
     database.getLinksByUid(req.query._uid).then((result) => {
         if (!result) {
             res.status(404).send({
@@ -244,7 +258,12 @@ let login = (req, res) => {
             });
         });
     }, (err) => {
-        res.status(500).send({ err: "database error." });
+        if (err === "userinfo error.") {
+            res.status(401).send({ err });
+        }
+        else {
+            res.status(500).send({ err: "database error." });
+        }
     });
 }
 let addUser = (req, res) => {
@@ -296,7 +315,7 @@ let getUser = (req, res) => {
                 purview: result.purview,
             });
         }, (err) => {
-            if (err === "user error.") {
+            if (err === "userinfo error.") {
                 res.status(404).send({ err });
             }
             else {
@@ -344,6 +363,13 @@ let updateUser = (req, res) => {
                     tokenDispose: tokenResult.dispose,
                 });
             });
+        }, (err) => {
+            if (err === "userinfo error.") {
+                res.status(401).send({ err });
+            }
+            else {
+                res.status(500).send({ err: "database error." });
+            }
         });
     });
 }
