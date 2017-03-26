@@ -12,24 +12,31 @@ let router = express.Router();
 
 
 let replaceMongoId = (req, res, next) => {
-    if (req.query.id === undefined) {
-        next();
-        return;
-    }
-    if (config.dataWay === "mongodb") {
-        try {
-            req.query._id = new ObjectID(req.query.id);
-            next();
-        } catch (err) {
-            res.status(404).send({
-                err: "Invalid ID.",
-            });
-            return;
+    if (req.query.uid !== undefined) {
+        if (config.dataWay === "mongodb") {
+            try {
+                req.query._uid = new ObjectID(req.query.id);
+            } catch (err) {
+                res.status(404).send({
+                    err: "uid error.",
+                });
+                return;
+            }
         }
     }
-    else {
-        next();
+    if (req.query.linkid != undefined) {
+        if (config.dataWay === "mongodb") {
+            try {
+                req.query._linkid = new ObjectID(req.query.linkid);
+            } catch (err) {
+                res.status(404).send({
+                    err: "linkid error.",
+                });
+                return;
+            }
+        }
     }
+    next();
 }
 let checkEmail = (req, res, next) => {
     database.getUserByEmail(req.query.email).then((result) => {
@@ -46,6 +53,7 @@ let checkEmail = (req, res, next) => {
     });
 }
 let checkToken = (req, res, next) => {
+    req.query.token = req.query.token || req.body.token;
     if (!req.query.token) {
         res.status(401).send({ err: "token error." });
         return;
@@ -53,9 +61,8 @@ let checkToken = (req, res, next) => {
     database.getTokenByToken(req.query.token).then((tokenResult) => {
         if (!tokenResult) {
             res.status(401).send({ err: "token error." });
-            return;
         }
-        req.query._id = tokenResult._uid;
+        req.query._uid = tokenResult._uid;
         next();
     }, (err) => {
         res.status(500).send({ err: "database error." });
@@ -141,10 +148,12 @@ let checkPrivate = (req, res, next) => {
     database.getTokenByToken(req.query.token).then((result) => {
         database.getUserById(result._uid).then((result) => {
             if (result.purview === "admin") {
+                req.query.purview = "admin";
                 next();
             }
             else {
                 if (result.email === req.query.email) {
+                    req.query.purview = "owner";
                     next();
                 }
                 else {
@@ -167,28 +176,32 @@ let checkPrivate = (req, res, next) => {
 
 
 let insertLink = (req, res) => {
-
     if (!req.query.link) {
         return res.status(400).send({
             err: "link error.",
         });
     }
-    database.insertLink(req.query.link).then((result) => {
-        res.status(201).send(result);
+    database.insertLink(req.query.link, req.query._linkid).then((result) => {
+        res.status(201).send({
+            uid: req.query._uid,
+            linkid: result._id,
+            link: req.query.link,
+            count: 0,
+        });
     }, (err) => {
         res.sendStatus(500);
     });
 }
 let removeLink = (req, res) => {
-    database.removeLinkById(req.query._id).then((result) => {
+    database.removeLinkById(req.query._linkid).then((result) => {
         res.status(204).send({});
     }, (err) => {
         res.status(500).send({ err: "database error." });
     });
 }
 let updateLink = (req, res) => {
-    database.updateLinkById(req.query._id, req.query.link).then((result) => {
-        database.getLinkById(req.query._id).then((linkResult) => {
+    database.updateLinkById(req.query._linkid, req.query.link).then((result) => {
+        database.getLinkById(req.query._linkid).then((linkResult) => {
             res.status(201).send(linkResult);
         });
     }, (err) => {
@@ -196,7 +209,9 @@ let updateLink = (req, res) => {
     });
 }
 let getLink = (req, res) => {
-    database.getLinkById(req.query._id).then((result) => {
+    req.query.page = req.query.page || 0;
+    req.query.per_page = req.query.per_page || 20;
+    database.getLinksByUid(req.query._uid).then((result) => {
         if (!result) {
             res.status(404).send({
                 err: "id error.",
@@ -255,8 +270,8 @@ let addUser = (req, res) => {
     });
 }
 let getUser = (req, res) => {
-    if (req.query._id !== undefined) {
-        database.getUserById(req.query._id).then((result) => {
+    if (req.query._uid !== undefined) {
+        database.getUserById(req.query._uid).then((result) => {
             res.status(200).send({
                 _id: result._id,
                 name: result.name,
@@ -294,8 +309,8 @@ let getUser = (req, res) => {
     }
 }
 let removeUser = (req, res) => {
-    if (req.query._id !== undefined) {
-        database.removeUserById(req.query._id).then((result) => {
+    if (req.query._uid !== undefined) {
+        database.removeUserById(req.query._uid).then((result) => {
             res.status(204).send({});
         }, (err) => {
             res.status(500).send({ err: "database error." });
@@ -339,14 +354,14 @@ let updateUser = (req, res) => {
 let routeLink = (req, res) => {
     database.getLinkById(req.query._id).then((result) => {
         if (!result) {
-            res.status(404).send({
-                err: "Invalid ID.",
-            });
+            res.status(404).send({ err: "id error." });
         }
         else {
             res.type('html')
             res.send(`<script>window.location.href='${result.link}';</script>`);
         }
+    }, (err) => {
+        res.status(500).send({ err: "database error." });
     });
     database.addCountById(req.query._id);
 }
@@ -357,8 +372,10 @@ let routeLink = (req, res) => {
 // organize params
 router.use(['/link', '/route'], (req, res, next) => {
     req.query.link = req.query.link || req.body.link;
-    req.query.id = req.query.id || req.body.id;
-
+    req.query.uid = req.query.uid || req.body.uid;
+    req.query.linkid = req.query.linkid || req.body.linkid;
+    req.query.page = req.query.page || req.body.page;
+    req.query.per_page = req.query.per_page || req.body.per_page;
 
     if (req.query.link) {
         if (!/^http/.test(req.query.link))
@@ -370,7 +387,6 @@ router.use(['/user', '/login'], (req, res, next) => {
     req.query.email = req.query.email || req.body.email;
     req.query.password = req.query.password || req.body.password;
     req.query.name = req.query.name || req.body.name;
-    req.query.token = req.query.token || req.body.token;
     next();
 });
 
@@ -388,13 +404,12 @@ router.post('/user', checkEmail);
 router.delete('/user', checkPrivate);
 router.put('/user', checkPrivate);
 
-router.get('/login', checkPassword);
 router.get('login', checkUserInfo)
-router.get('/login', login);
+router.get('/login', checkPassword);
 
 router.post('/link', checkToken);
-router.put('/link', checkToken);
-router.delete('/link', checkToken);
+router.put('/link', checkPrivate);
+router.delete('/link', checkPrivate);
 
 
 router.post('/link', insertLink);
@@ -407,7 +422,10 @@ router.delete('/user', removeUser);
 router.put('/user', updateUser);
 router.get('/user', getUser);
 
+router.get('/login', login);
+
 router.get('/route', routeLink);
+
 
 module.exports = router;
 

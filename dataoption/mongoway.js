@@ -18,7 +18,7 @@ let getCollection = (docName) => {
             }
         });
     })
-};
+}
 let createToken = () => {
     return getCollection(config.token).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
@@ -80,10 +80,14 @@ let getPasswordByEmail = (email) => {
 
 
 
-let insertLink = (linkUrl) => {
+let insertLink = (linkUrl, _uid) => {
     return getCollection(config.urls).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
-            collection.insertOne({ link: linkUrl, count: 0 }, function (err, result) {
+            collection.insertOne({
+                link: linkUrl,
+                _uid,
+                count: 0
+            }, function (err, result) {
                 if (err) {
                     reject(err);
                 }
@@ -137,6 +141,24 @@ let getLinkById = (_id) => {
                 }
                 db.close();
             });
+        });
+    });
+}
+let getLinksByUid = (_uid, page, per_page) => {
+    return getCollection(config.urls).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            collection.find({ _uid })
+                .skip(page * per_page)
+                .limit(per_page)
+                .toArray(function (err, result) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve(result);
+                    }
+                    db.close();
+                });
         });
     });
 }
@@ -291,7 +313,7 @@ let getUserById = (_id) => {
                     reject(err);
                 }
                 else if (result === null) {
-                    reject("user not exist.");
+                    reject("user error.");
                 }
                 else {
                     resolve({
@@ -488,10 +510,13 @@ let setAdmin = (email) => {
 
 
 module.exports = {
+    getCollection,
+
     insertLink,
     updateLinkById,
     removeLinkById,
     getLinkById,
+    getLinksByUid,
 
     getCountById,
     setCountById,
