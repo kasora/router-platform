@@ -229,35 +229,41 @@ let insertUser = (userInfo) => {
         });
     });
 }
-let removeUserById = (id) => {
-    return getCollection(config.user).then(({ db, collection }) => {
-        return new Promise((resolve, reject) => {
-            collection.removeOne({ _id: id }, function (err, result) {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(result);
-                }
-                db.close();
+let removeUserById = (_id) => {
+    return removeToken(_id).then(() => {
+        return getCollection(config.user).then(({ db, collection }) => {
+            return new Promise((resolve, reject) => {
+                collection.removeOne({ _id }, function (err, result) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve(result);
+                    }
+                    db.close();
+                });
             });
         });
     });
 }
 let removeUserByEmail = (email) => {
-    return getCollection(config.user).then(({ db, collection }) => {
-        return new Promise((resolve, reject) => {
-            collection.removeOne({ email }, function (err, result) {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(result);
-                }
-                db.close();
+    return getUserByEmail(email).then(userResult => {
+        return removeToken(userResult._id).then(() => {
+            return getCollection(config.user).then(({ db, collection }) => {
+                return new Promise((resolve, reject) => {
+                    collection.removeOne({ email }, function (err, result) {
+                        if (err) {
+                            reject(err);
+                        }
+                        else {
+                            resolve(result);
+                        }
+                        db.close();
+                    });
+                });
             });
         });
-    });
+    },()=>{});
 }
 let updateUserById = (id, userInfo) => {
     return getCollection(config.user).then(({ db, collection }) => {

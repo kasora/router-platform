@@ -22,10 +22,12 @@ let adminInfo = {
     password: config.adminPassword,
     passwordMD5: md5(config.adminPassword),
 }
-let fakeadmin = JSON.parse(JSON.stringify(guestInfo));
 guestInfo.passwordMD5 = md5(guestInfo.password);
+let fakeadmin = JSON.parse(JSON.stringify(guestInfo));
 fakeadmin.purview = "admin";
 fakeadmin.email = "fake@kasora.moe";
+
+
 
 function signup(userInfo) {
     return new Promise((resolve, reject) => {
@@ -203,6 +205,71 @@ function addLink(userInfo, link) {
         xhr.open("POST", url + "?" + params, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.send();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 201) {
+                try {
+                    let linkInfo = JSON.parse(xhr.responseText);
+                    assert(linkInfo.uid !== undefined);
+                    assert(linkInfo.linkid !== undefined);
+                    assert(linkInfo.count !== undefined);
+                    resolve(linkInfo);
+                }
+                catch (err) {
+                    reject(err);
+                }
+            }
+            else if (xhr.readyState == 4) {
+                reject(JSON.parse(xhr.responseText).err);
+            }
+        }
+    });
+}
+function getLink(userInfo, page, per_page) {
+    return new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        let url = `http://localhost:${config.port}/api/link`;
+        let params = `token=${userInfo.token}`;
+        if (page) params += `&page=${page}`;
+        if (per_page) params += `&per_page=${per_page}`;
+        xhr.open("GET", url + "?" + params, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                try {
+                    let linkInfo = JSON.parse(xhr.responseText);
+                    resolve(linkInfo);
+                }
+                catch (err) {
+                    reject(err);
+                }
+            }
+            else if (xhr.readyState == 4) {
+                reject(JSON.parse(xhr.responseText).err);
+            }
+        }
+    });
+}
+function removeLink(userInfo, linkid) {
+    return new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        let url = `http://localhost:${config.port}/api/link`;
+        let params = `token=${userInfo.token}&linkid=${linkid}`;
+        xhr.open("DELETE", url + "?" + params, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 204) {
+                assert(xhr.responseText === "");
+                resolve();
+            }
+            else if (xhr.readyState == 4) {
+                reject(JSON.parse(xhr.responseText).err);
+            }
+        }
     });
 }
 
@@ -349,11 +416,30 @@ describe('check user part.', () => {
             );
         });
     });
-
 });
 
 describe('check link part.', () => {
-    it('insert link.', function () {
 
+    it('insert link.', function () {
+        let newLink = "https://testlink.com";
+        return addLink(guestInfo, newLink).then((linkInfo) => {
+            assert(linkInfo.link === newLink);
+        });
+    });
+
+    it('fix link.', function () {
+        let newLink = "testnewlink.com";
+        return addLink(guestInfo, newLink).then((linkInfo) => {
+            assert(linkInfo.link === "http://" + newLink);
+        });
+    });
+
+    it('remove links.', async function () {
+        let links = await getLink(guestInfo);
+        for (let element of links) {
+            await removeLink(guestInfo, element._id);
+        };
+        links = await getLink(guestInfo);
+        assert(links.length === 0);
     });
 });

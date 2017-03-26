@@ -15,7 +15,7 @@ let replaceMongoId = (req, res, next) => {
     if (req.query.uid !== undefined) {
         if (config.dataWay === "mongodb") {
             try {
-                req.query._uid = new ObjectID(req.query.id);
+                req.query._uid = new ObjectID(req.query.uid);
             } catch (err) {
                 res.status(404).send({
                     err: "uid error.",
@@ -145,25 +145,60 @@ let checkUserInfo = (req, res, next) => {
     }
     next();
 }
-let checkPrivate = (req, res, next) => {
+let checkUserPurview = (req, res, next) => {
     if (req.query.token === undefined) {
         res.status(401).send({ err: "purview error." });
         return;
     }
-    database.getTokenByToken(req.query.token).then((result) => {
-        database.getUserById(result._uid).then((result) => {
+    database.getTokenByToken(req.query.token).then((tokenResult) => {
+        database.getUserById(tokenResult._uid).then((result) => {
             if (result.purview === "admin") {
                 req.query.purview = "admin";
                 next();
             }
+            else if (result.email === req.query.email) {
+                req.query.purview = "owner";
+                next();
+            }
             else {
-                if (result.email === req.query.email) {
-                    req.query.purview = "owner";
-                    next();
-                }
-                else {
-                    res.status(401).send({ err: "token error." });
-                }
+                res.status(401).send({ err: "token error." });
+            }
+        }, (err) => {
+            if (err === "user error.") {
+                res.status(401).send({ err: "token error." });
+            }
+            else {
+                res.status(500).send({ err: "database error." });
+            }
+        });
+    }, (err) => {
+        if (err === "token error.") {
+            res.status(401).send({ err });
+        }
+        else {
+            res.status(500).send({ err: "database error." })
+        }
+    });
+}
+let checkLinkPurview = (req, res, next) => {
+    if (req.query.token === undefined) {
+        res.status(401).send({ err: "purview error." });
+        return;
+    }
+    database.getTokenByToken(req.query.token).then((tokenResult) => {
+        if (tokenResult.purview === "admin") {
+            req.query.purview = "admin";
+            next();
+            return;
+        }
+        database.getLinkById(req.query._linkid).then((linkResult) => {
+            if (linkResult._uid.toString() === tokenResult._uid.toString()) {
+                req.query.purview = "owner";
+                next();
+                return;
+            }
+            else {
+                res.status(401).send({ err: "token error." });
             }
         }, (err) => {
             if (err === "user error.") {
@@ -191,7 +226,7 @@ let insertLink = (req, res) => {
             err: "link error.",
         });
     }
-    database.insertLink(req.query.link, req.query._linkid).then((result) => {
+    database.insertLink(req.query.link, req.query._uid).then((result) => {
         res.status(201).send({
             uid: req.query._uid,
             linkid: result._id,
@@ -222,20 +257,20 @@ let updateLink = (req, res) => {
     });
 }
 let getLink = (req, res) => {
-    req.query.page = req.query.page || 0;
-    req.query.per_page = req.query.per_page || 20;
+    req.query.page = parseInt(req.query.page) || 0;
+    req.query.per_page = parseInt(req.query.per_page) || 20;
     req.query.per_page = req.query.per_page > 100 ? 100 : req.query.per_page;
-    database.getLinksByUid(req.query._uid).then((result) => {
+    database.getLinksByUid(req.query._uid, req.query.page, req.query.per_page).then((result) => {
         if (!result) {
             res.status(404).send({
                 err: "id error.",
             });
         }
         else {
-            res.send(result);
+            res.status(200).send(result);
         }
     }, (err) => {
-        res.sendStatus(500);
+        res.status(500).send({ err: "database error." });
     });
 }
 
@@ -427,15 +462,15 @@ router.post('/user', (req, res, next) => {
     next();
 });
 router.post('/user', checkEmail);
-router.delete('/user', checkPrivate);
-router.put('/user', checkPrivate);
+router.delete('/user', checkUserPurview);
+router.put('/user', checkUserPurview);
 
 router.get('login', checkUserInfo)
 router.get('/login', checkPassword);
 
-router.post('/link', checkToken);
-router.put('/link', checkPrivate);
-router.delete('/link', checkPrivate);
+router.use('/link', checkToken);
+router.put('/link', checkLinkPurview);
+router.delete('/link', checkLinkPurview);
 
 
 router.post('/link', insertLink);
