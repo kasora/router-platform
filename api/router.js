@@ -186,20 +186,29 @@ let checkLinkPurview = (req, res, next) => {
         return;
     }
     database.getTokenByToken(req.query.token).then((tokenResult) => {
-        if (tokenResult.purview === "admin") {
-            req.query.purview = "admin";
-            next();
-            return;
-        }
-        database.getLinkById(req.query._linkid).then((linkResult) => {
-            if (linkResult._uid.toString() === tokenResult._uid.toString()) {
-                req.query.purview = "owner";
+        database.getUserById(tokenResult._uid).then((result) => {
+            if (result.purview === "admin") {
+                req.query.purview = "admin";
                 next();
                 return;
             }
-            else {
-                res.status(401).send({ err: "token error." });
-            }
+            database.getLinkById(req.query._linkid).then((linkResult) => {
+                if (linkResult._uid.toString() === tokenResult._uid.toString()) {
+                    req.query.purview = "owner";
+                    next();
+                    return;
+                }
+                else {
+                    res.status(401).send({ err: "token error." });
+                }
+            }, (err) => {
+                if (err === "user error.") {
+                    res.status(401).send({ err: "token error." });
+                }
+                else {
+                    res.status(500).send({ err: "database error." });
+                }
+            });
         }, (err) => {
             if (err === "user error.") {
                 res.status(401).send({ err: "token error." });
@@ -246,9 +255,6 @@ let removeLink = (req, res) => {
 }
 let updateLink = (req, res) => {
     database.getLinkById(req.query._linkid).then((linkResult) => {
-        if (linkResult._uid !== req.query._uid) {
-            res.status(401).send({ err: "purview error." });
-        }
         database.updateLinkById(req.query._linkid, req.query.newlink).then((result) => {
             res.status(201).send(linkResult);
         });
@@ -267,7 +273,16 @@ let getLink = (req, res) => {
             });
         }
         else {
-            res.status(200).send(result);
+            let links = [];
+            for (let element of result) {
+                links.push({
+                    uid: element._uid,
+                    link: element.link,
+                    linkid: element._id,
+                    count: element.count,
+                });
+            }
+            res.status(200).send(links);
         }
     }, (err) => {
         res.status(500).send({ err: "database error." });

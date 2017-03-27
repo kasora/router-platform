@@ -272,6 +272,31 @@ function removeLink(userInfo, linkid) {
         }
     });
 }
+function updateLink(userInfo, linkid, newlink) {
+    return new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        let url = `http://localhost:${config.port}/api/link`;
+        let params = `token=${userInfo.token}&linkid=${linkid}&newlink=${newlink}`;
+        xhr.open("PUT", url + "?" + params, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send();
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 201) {
+                try {
+                    let linkInfo = JSON.parse(xhr.responseText);
+                    resolve(linkInfo);
+                }
+                catch (err) {
+                    reject(err);
+                }
+            }
+            else if (xhr.readyState == 4) {
+                reject(JSON.parse(xhr.responseText).err);
+            }
+        }
+    });
+}
 
 describe('check user part.', () => {
 
@@ -408,7 +433,7 @@ describe('check user part.', () => {
         });
     });
 
-    it('fake admin test update.', function () {
+    it('fake admin test update user.', function () {
         return new Promise((resolve, reject) => {
             userUpdate(fakeadmin, guestInfo).then(
                 () => { reject() },
@@ -419,7 +444,6 @@ describe('check user part.', () => {
 });
 
 describe('check link part.', () => {
-
     it('insert link.', function () {
         let newLink = "https://testlink.com";
         return addLink(guestInfo, newLink).then((linkInfo) => {
@@ -434,10 +458,91 @@ describe('check link part.', () => {
         });
     });
 
+    it('update links.', async function () {
+        let oldLink = "http://oldLink.com";
+        let newLink = "http://newlink.com";
+        let linkInfo = await addLink(guestInfo, oldLink);
+        await updateLink(guestInfo, linkInfo.linkid, newLink);
+        let links = await getLink(guestInfo);
+        for (let element of links) {
+            if (element.linkid === linkInfo.linkid) {
+                assert(element.link === newLink);
+            }
+        }
+    });
+
+    it('admin update links.', async function () {
+        let oldLink = "http://oldLink.com";
+        let newLink = "http://newlink.com";
+        let linkInfo = await addLink(guestInfo, oldLink);
+        await updateLink(adminInfo, linkInfo.linkid, newLink);
+        let links = await getLink(guestInfo);
+        for (let element of links) {
+            if (element.linkid === linkInfo.linkid) {
+                assert(element.link === newLink);
+            }
+        }
+    });
+
+    it('fake admin update links.', async function () {
+        let oldLink = "http://oldLink.com";
+        let newLink = "http://newlink.com";
+        let linkInfo = await addLink(guestInfo, oldLink);
+        try {
+            await updateLink(fakeadmin, linkInfo.linkid, newLink);
+            assert("fakeadmin can't update link." === 0);
+        }
+        catch (err) {
+        }
+        let links = await getLink(guestInfo);
+        for (let element of links) {
+            if (element.linkid === linkInfo.linkid) {
+                assert(element.link === oldLink);
+            }
+        }
+    });
+
+    it('user remove link.', async function () {
+        let newLink = "http://newlink.com";
+        let linkInfo = await addLink(guestInfo, newLink);
+        await removeLink(guestInfo, linkInfo.linkid);
+        let links = await getLink(guestInfo);
+        for (let element of links) {
+            assert(element.linkid !== linkInfo.linkid);
+        }
+    });
+
+    it('admin remove link.', async function () {
+        let newLink = "http://newlink.com";
+        let linkInfo = await addLink(guestInfo, newLink);
+        await removeLink(adminInfo, linkInfo.linkid);
+        let links = await getLink(guestInfo);
+        for (let element of links) {
+            assert(element.linkid !== linkInfo.linkid);
+        }
+    });
+
+    it('fake admin remove link.', async function () {
+        let newLink = "http://newlink.com";
+        let linkInfo = await addLink(guestInfo, newLink);
+        try {
+            await removeLink(fakeadmin, linkInfo.linkid);
+            assert("fakeadmin can't remove link." === 0);
+        }
+        catch (err) {
+        }
+        let links = await getLink(guestInfo);
+        let linkids = [];
+        for (let element of links) {
+            linkids.push(element.linkid);
+        }
+        assert(linkids.indexOf(linkInfo.linkid) !== -1);
+    });
+
     it('remove links.', async function () {
         let links = await getLink(guestInfo);
         for (let element of links) {
-            await removeLink(guestInfo, element._id);
+            await removeLink(guestInfo, element.linkid);
         };
         links = await getLink(guestInfo);
         assert(links.length === 0);
