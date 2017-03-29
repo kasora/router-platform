@@ -431,15 +431,18 @@ let routeLink = (req, res) => {
     database.getLinkById(req.query._id).then((result) => {
         if (!result) {
             res.status(404).send({ err: "id error." });
+            return;
         }
         else {
             res.type('html')
             res.send(`<script>window.location.href='${result.link}';</script>`);
+            database.addCountById(req.query._id);
         }
     }, (err) => {
         res.status(500).send({ err: "database error." });
+        return;
     });
-    database.addCountById(req.query._id);
+    
 }
 
 

@@ -6,12 +6,12 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const ObjectID = require('mongodb').ObjectID;
 const fs = require('fs');
+const path = require('path');
 
 let router = express.Router();
 let app = express();
 
-
-app.use('/checkService',(req,res)=>{
+app.use('/checkService', (req, res) => {
     res.sendStatus(200);
 })
 
@@ -30,11 +30,17 @@ app.use(bodyParser.json({ type: 'application/*+json' }));
 app.use(bodyParser.raw({ type: 'application/vnd.custom-type' }));
 app.use(bodyParser.text({ type: 'text/html' }));
 
+app.use(express.static(__dirname + '/static'));
+
 app.use('/api/link', (req, res, next) => {
     res.type("json");
     next();
 });
 app.use('/api', require('./api/router'));
+
+app.get('*', function (req, res) {
+    res.sendFile(path.resolve(__dirname, 'static', 'index.html'));
+})
 
 app.listen(config.port);
 console.log(`Service started at port ${config.port}.`);
