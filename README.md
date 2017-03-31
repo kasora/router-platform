@@ -1,3 +1,8 @@
+Router Platform
+===============
+
+[![Build Status](https://travis-ci.org/kasora/router-platform.svg?branch=master)](https://travis-ci.org/kasora/router-platform)
+
 
 ## 简介
 网页跳转平台，使用 `Express` 和 `MongoDB` 。尚未完成。
