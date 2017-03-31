@@ -6,6 +6,9 @@ const randomstring = require('randomstring');
 const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const config = require('../../config');
 const mongoway = require('../../dataoption/mongoway');
+const request = require('supertest');
+
+let app = require('../../server');
 
 let guestInfo = {
     email: 'justtest@kasora.moe',
@@ -27,486 +30,379 @@ let fakeadmin = JSON.parse(JSON.stringify(guestInfo));
 fakeadmin.purview = "admin";
 fakeadmin.email = "fake@kasora.moe";
 
-
+let agent = request.agent(app);
 
 function signup(userInfo) {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        let params = `email=${userInfo.email}&password=${userInfo.passwordMD5}`;
-        if (userInfo.name !== undefined) {
-            params += `&name=${userInfo.name}`;
-        }
-        xhr.open("POST", `http://localhost:${config.port}/api/user`, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send(params);
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 201) {
-                let resUserInfo = JSON.parse(xhr.responseText);
-                try {
-                    assert(resUserInfo.name !== undefined);
-                    assert(resUserInfo.email === userInfo.email);
-                    assert(resUserInfo._id !== undefined);
-                    assert(resUserInfo.token !== undefined);
-                    assert(resUserInfo.tokenDispose !== undefined);
-                    assert(resUserInfo.purview !== undefined);
-                    if (userInfo.name !== undefined) {
-                        assert(resUserInfo.name === userInfo.name);
-                    }
-                    userInfo._id = resUserInfo._id;
-                    userInfo.purview = resUserInfo.purview;
-                    userInfo.token = resUserInfo.token;
-                    userInfo.dispose = resUserInfo.tokenDispose;
-                    resolve(resUserInfo);
-                }
-                catch (err) {
-                    reject("sign up error.");
-                }
-            }
-            else if (xhr.readyState == 4) {
-                reject(JSON.parse(xhr.responseText).err);
-            }
-        }
-    });
+    let params = `email=${userInfo.email}&password=${userInfo.passwordMD5}`;
+    if (userInfo.name) params += `&name=${userInfo.name}`;
+    return agent
+        .post('/api/user' + '?' + params)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .expect(201);
 }
 function login(userInfo) {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        let url = `http://localhost:${config.port}/api/login`;
-        let params = `email=${userInfo.email}&password=${userInfo.passwordMD5}`;
-        xhr.open("GET", url + "?" + params, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 201) {
-                let resUserInfo = JSON.parse(xhr.responseText);
-                try {
-                    assert(resUserInfo.name !== undefined);
-                    assert(resUserInfo.email === userInfo.email);
-                    assert(resUserInfo._id !== undefined);
-                    assert(resUserInfo.token !== undefined);
-                    assert(resUserInfo.tokenDispose !== undefined);
-                    assert(resUserInfo.purview !== undefined);
-                    if (userInfo.name !== undefined) {
-                        assert(resUserInfo.name === userInfo.name);
-                    }
-                    userInfo._id = resUserInfo._id;
-                    userInfo.purview = resUserInfo.purview;
-                    userInfo.token = resUserInfo.token;
-                    userInfo.dispose = resUserInfo.tokenDispose;
-                    resolve(resUserInfo);
-                }
-                catch (err) {
-                    reject(err);
-                }
-            }
-            else if (xhr.readyState == 4) {
-                reject(JSON.parse(xhr.responseText).err);
-            }
-        }
-    });
+    let params = `email=${userInfo.email}&password=${userInfo.passwordMD5}`;
+    return agent
+        .get('/api/login' + '?' + params)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .expect(201);
 }
-function remove(permission, userInfo) {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        let url = `http://localhost:${config.port}/api/user`;
-        let params = `email=${userInfo.email}&token=${permission.token}`;
-        xhr.open("DELETE", url + "?" + params, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 204) {
-                try {
-                    assert(xhr.responseText === "");
-                    resolve();
-                }
-                catch (err) {
-                    reject(err);
-                }
-            }
-            else if (xhr.readyState == 4) {
-                reject(JSON.parse(xhr.responseText).err);
-            }
-        }
-    });
+function logout() {
+    return agent
+        .delete('/api/login')
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .expect(204);
+}
+function remove(userInfo) {
+    let params = `email=${userInfo.email}`;
+    return agent
+        .delete('/api/user' + '?' + params)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .expect(204);
 }
 function getUser(userInfo) {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        let url = `http://localhost:${config.port}/api/user`;
-        let params = `email=${userInfo.email}`;
-        xhr.open("GET", url + "?" + params, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                let resUserInfo = JSON.parse(xhr.responseText);
-                try {
-                    assert(resUserInfo.name !== undefined);
-                    assert(resUserInfo.email === userInfo.email);
-                    assert(resUserInfo._id !== undefined);
-                    assert(resUserInfo.purview !== undefined);
-                    if (userInfo.name !== undefined) {
-                        assert(resUserInfo.name === userInfo.name);
-                    }
-                    resolve(resUserInfo);
-                }
-                catch (err) {
-                    reject(err);
-                }
-            }
-            else if (xhr.readyState == 4) {
-                reject(JSON.parse(xhr.responseText).err);
-            }
-        }
-    });
+    let params = `email=${userInfo.email}`;
+    return agent
+        .get('/api/user' + '?' + params)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .expect(200);
 }
-function userUpdate(permission, newUserInfo) {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        let url = `http://localhost:${config.port}/api/user`;
-        let params = `token=${permission.token}&email=${newUserInfo.email}&name=${newUserInfo.name}&password=${newUserInfo.passwordMD5}`;
-        xhr.open("PUT", url + "?" + params, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 201) {
-                let resUserInfo = JSON.parse(xhr.responseText);
-                try {
-                    assert(resUserInfo.name !== undefined);
-                    assert(resUserInfo.email === newUserInfo.email);
-                    assert(resUserInfo._id !== undefined);
-                    assert(resUserInfo.purview === newUserInfo.purview);
-                    if (newUserInfo.name !== undefined) {
-                        assert(resUserInfo.name === newUserInfo.name);
-                    }
-                    resolve(resUserInfo);
-                }
-                catch (err) {
-                    reject(err);
-                }
-            }
-            else if (xhr.readyState == 4) {
-                reject(JSON.parse(xhr.responseText).err);
-            }
-        }
-    });
+function userUpdate(newUserInfo) {
+    let params = `email=${newUserInfo.email}&name=${newUserInfo.name}&password=${newUserInfo.passwordMD5}`;
+    return agent
+        .put('/api/user' + '?' + params)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .expect(201);
 }
 
-function addLink(userInfo, link) {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        let url = `http://localhost:${config.port}/api/link`;
-        let params = `token=${userInfo.token}&link=${link}`;
-        xhr.open("POST", url + "?" + params, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 201) {
-                try {
-                    let linkInfo = JSON.parse(xhr.responseText);
-                    assert(linkInfo.uid !== undefined);
-                    assert(linkInfo.linkid !== undefined);
-                    assert(linkInfo.count !== undefined);
-                    resolve(linkInfo);
-                }
-                catch (err) {
-                    reject(err);
-                }
-            }
-            else if (xhr.readyState == 4) {
-                reject(JSON.parse(xhr.responseText).err);
-            }
-        }
-    });
+function addLink(link) {
+    let params = `link=${link}`;
+    return agent
+        .post('/api/link' + '?' + params)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .expect(201);
 }
-function getLink(userInfo, page, per_page) {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        let url = `http://localhost:${config.port}/api/link`;
-        let params = `token=${userInfo.token}`;
-        if (page) params += `&page=${page}`;
-        if (per_page) params += `&per_page=${per_page}`;
-        xhr.open("GET", url + "?" + params, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                try {
-                    let linkInfo = JSON.parse(xhr.responseText);
-                    resolve(linkInfo);
-                }
-                catch (err) {
-                    reject(err);
-                }
-            }
-            else if (xhr.readyState == 4) {
-                reject(JSON.parse(xhr.responseText).err);
-            }
-        }
-    });
+function getLink(page, per_page) {
+    let params = "";
+    if (page) params += `&page=${page}`;
+    if (per_page) params += `&per_page=${per_page}`;
+    return agent
+        .get('/api/link' + '?' + params)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .expect(200);
 }
-function removeLink(userInfo, linkid) {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        let url = `http://localhost:${config.port}/api/link`;
-        let params = `token=${userInfo.token}&linkid=${linkid}`;
-        xhr.open("DELETE", url + "?" + params, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 204) {
-                assert(xhr.responseText === "");
-                resolve();
-            }
-            else if (xhr.readyState == 4) {
-                reject(JSON.parse(xhr.responseText).err);
-            }
-        }
-    });
+function removeLink(linkid) {
+    let params = `linkid=${linkid}`;
+    return agent
+        .delete('/api/link' + '?' + params)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .expect(204);
 }
-function updateLink(userInfo, linkid, newlink) {
-    return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
-        let url = `http://localhost:${config.port}/api/link`;
-        let params = `token=${userInfo.token}&linkid=${linkid}&newlink=${newlink}`;
-        xhr.open("PUT", url + "?" + params, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.send();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 201) {
-                try {
-                    let linkInfo = JSON.parse(xhr.responseText);
-                    resolve(linkInfo);
-                }
-                catch (err) {
-                    reject(err);
-                }
-            }
-            else if (xhr.readyState == 4) {
-                reject(JSON.parse(xhr.responseText).err);
-            }
-        }
-    });
+function updateLink(linkid, newlink) {
+    let params = `linkid=${linkid}&newlink=${newlink}`;
+    return agent
+        .put('/api/link' + '?' + params)
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .expect(201);
 }
 
 describe('check user part.', () => {
 
-    before(function () {
-        return login(adminInfo)
-            .then(() => { }, () => { return signup(adminInfo); })
-            .then(() => { return mongoway.setAdmin(adminInfo.email); })
-            .then(() => { return remove(adminInfo, guestInfo); })
-            .then(() => { return remove(adminInfo, wrongInfo); })
-            .then(() => { return remove(adminInfo, fakeadmin); })
-            .then(() => { return remove(adminInfo, adminInfo); });
+    before(async function () {
+        try {
+            await signup(adminInfo);
+        }
+        catch (err) {
+            await login(adminInfo);
+        }
+        await mongoway.setAdmin(adminInfo.email);
+        await remove(guestInfo);
+        await remove(fakeadmin);
+        await remove(adminInfo);
     });
 
-    it('check service.', function () {
-        return new Promise((resolve, reject) => {
-            let xhr = new XMLHttpRequest();
-            xhr.open("GET", `http://localhost:${config.port}/checkService`, true);
-            xhr.send();
-
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    resolve();
-                }
-            }
-        });
+    it('check service.', async function () {
+        await request(app)
+            .get('/checkService')
+            .expect(200);
     });
 
-    it('user sign up.', function () {
-        return signup(guestInfo);
+    it('user sign up.', async function () {
+        let info = await signup(guestInfo);
+        assert(info.body.email === guestInfo.email);
+        assert(info.body.name === guestInfo.name);
+
+        await remove(guestInfo);
     });
 
-    it('user sign up on the same email.', function () {
-        return signup(adminInfo).then(() => {
-            return new Promise((resolve, reject) => {
-                return signup(adminInfo).then(
-                    () => { reject() },
-                    () => { resolve() }
-                );
-            });
-        });
+    it('user sign up without name.', async function () {
+        let temp = guestInfo.name;
+        guestInfo.name = undefined;
+
+        let info = await signup(guestInfo);
+        assert(info.body.email === guestInfo.email);
+        assert(info.body.name === "unknown");
+
+        guestInfo.name = temp;
+        await remove(guestInfo);
     });
 
-    it('user login.', function () {
-        return login(guestInfo);
+    it('user sign up on the same email.', async function () {
+        await signup(guestInfo);
+        try {
+            await signup(guestInfo)
+            assert(false);
+        }
+        catch (err) {
+        }
+
+        await remove(guestInfo);
     });
 
-    it('admin login.', function () {
-        return login(adminInfo);
+    it('user login.', async function () {
+        await signup(guestInfo);
+        let info = await login(guestInfo);
+        assert(info.body.email === guestInfo.email);
+        assert(info.body.name === guestInfo.name);
+
+        await remove(guestInfo);
     });
 
-    it('find user.', function () {
-        return getUser(guestInfo);
+    it('user log out.', async function () {
+        await signup(guestInfo);
+
+        await logout();
+        try {
+            await remove(guestInfo);
+            assert(false);
+        }
+        catch (err) {
+        }
+
+        await login(guestInfo);
+        await remove(guestInfo);
     });
 
-    it('purview up', function () {
-        return mongoway.setAdmin(adminInfo.email).then((result) => {
-            adminInfo.purview = "admin";
-            return new Promise((resolve, reject) => {
-                getUser(adminInfo).then((userResult) => {
-                    if (userResult.purview === "admin") {
-                        resolve();
-                    }
-                    else {
-                        reject();
-                    }
-                }, (err) => { reject(err) });
-            });
-        });
+    it('find user.', async function () {
+        await signup(guestInfo);
+        await logout();
+        let info = await getUser(guestInfo);
+        assert(info.body.email === guestInfo.email);
+        assert(info.body.name === guestInfo.name);
+
+        await login(guestInfo);
+        await remove(guestInfo);
     });
 
-    it('wrong login.', function () {
-        return new Promise((resolve, reject) => {
-            return login(wrongInfo).then(
-                () => { reject(); },
-                () => { resolve(); }
-            );
-        });
+    it('purview up', async function () {
+        await signup(guestInfo);
+
+        await signup(adminInfo);
+        await mongoway.setAdmin(adminInfo.email);
+
+        await remove(guestInfo);
+
+        await remove(adminInfo);
     });
 
-    it('user remove.', function () {
-        return remove(adminInfo, guestInfo).then(() => {
-            return new Promise((resolve, reject) => {
-                getUser(guestInfo).then((result) => {
-                    reject();
-                }, (err) => {
-                    resolve();
-                });
-            }).then(() => { return signup(guestInfo); });
-        });
+    it('wrong login.', async function () {
+        await signup(guestInfo);
+        try {
+            await login(wrongInfo);
+            assert(false);
+        }
+        catch (err) { }
+
+        await remove(guestInfo);
     });
 
-    it('fake admin sign up.', function () {
-        return signup(fakeadmin).then((result) => {
-            assert(result.purview === "user");
-        });
+    it('fake admin test.', async function () {
+        await signup(guestInfo);
+
+        let params = `email=${fakeadmin.email}&password=${fakeadmin.passwordMD5}`;
+        params += "&purview=admin";
+        let info = await agent
+            .post('/api/user' + '?' + params)
+            .set("Content-Type", "application/x-www-form-urlencoded")
+            .expect(201);
+        assert(info.body.purview === "user");
+
+        try {
+            await remove(guestInfo);
+            assert(false);
+        }
+        catch (err) { }
+
+        await remove(fakeadmin);
+        await login(guestInfo);
+        await remove(guestInfo);
     });
 
-    it('fake admin login.', function () {
-        return login(fakeadmin);
+    it('user update by themselves.', async function () {
+        let tempInfo = JSON.parse(JSON.stringify(guestInfo));
+        await signup(tempInfo);
+
+        tempInfo.name = "updateguest";
+        tempInfo.password = randomstring.generate();
+        tempInfo.passwordMD5 = md5(guestInfo.password);
+
+        await userUpdate(tempInfo);
+        let info = await login(tempInfo);
+        assert(info.body.name === tempInfo.name);
+
+        await remove(tempInfo);
     });
 
-    it('fake admin test remove.', function () {
-        return new Promise((resolve, reject) => {
-            return remove(fakeadmin, guestInfo).then(
-                () => { reject(); },
-                () => { resolve(); }
-            )
-        })
+    it('user update by admin.', async function () {
+        let tempInfo = JSON.parse(JSON.stringify(guestInfo));
+        await signup(tempInfo);
+
+        tempInfo.name = "updateguest";
+        tempInfo.password = randomstring.generate();
+        tempInfo.passwordMD5 = md5(guestInfo.password);
+
+        await signup(adminInfo);
+        await mongoway.setAdmin(adminInfo.email);
+
+        await userUpdate(tempInfo);
+        let info = await login(tempInfo);
+        assert(info.body.name === tempInfo.name);
+
+        await remove(tempInfo);
+        await login(adminInfo);
+        await remove(adminInfo);
     });
 
-    it('user update by themselves.', function () {
-        guestInfo.name = "updateguest";
-        guestInfo.password = randomstring.generate();
-        guestInfo.passwordMD5 = md5(guestInfo.password);
-        return userUpdate(guestInfo, guestInfo).then(() => {
-            return login(guestInfo).then((result) => {
-                assert(result.name === guestInfo.name);
-            }, (err) => {
-                throw "login error."
-            });
-        });
+    it('fake admin test update user.', async function () {
+        let tempInfo = JSON.parse(JSON.stringify(guestInfo));
+        await signup(tempInfo);
+
+        tempInfo.name = "updateguest";
+        tempInfo.password = randomstring.generate();
+        tempInfo.passwordMD5 = md5(guestInfo.password);
+
+        await signup(fakeadmin);
+
+        try {
+            await userUpdate(tempInfo);
+            assert(false);
+        }
+        catch (err) { }
+
+        let info = await login(guestInfo);
+        assert(info.body.name === guestInfo.name);
+
+        await remove(guestInfo);
+        await login(fakeadmin);
+        await remove(fakeadmin);
     });
 
-    it('user update by admin.', function () {
-        guestInfo.name = "updateguest";
-        guestInfo.password = randomstring.generate();
-        guestInfo.passwordMD5 = md5(guestInfo.password);
-        return userUpdate(adminInfo, guestInfo).then(() => {
-            return login(guestInfo).then((result) => {
-                assert(result.name === guestInfo.name);
-            }, (err) => {
-                throw "login error."
-            });
-        });
-    });
-
-    it('fake admin test update user.', function () {
-        return new Promise((resolve, reject) => {
-            userUpdate(fakeadmin, guestInfo).then(
-                () => { reject() },
-                () => { resolve() }
-            );
-        });
+    after(async function () {
+        await signup(guestInfo);
+        await signup(fakeadmin);
+        await signup(adminInfo);
+        await mongoway.setAdmin(adminInfo.email);
+        await logout();
     });
 });
 
 describe('check link part.', () => {
-    it('insert link.', function () {
+    it('insert link.', async function () {
         let newLink = "https://testlink.com";
-        return addLink(guestInfo, newLink).then((linkInfo) => {
-            assert(linkInfo.link === newLink);
-        });
+        await login(guestInfo);
+        let linkInfo = (await addLink(newLink)).body;
+        assert(linkInfo.link === newLink);
+        assert(linkInfo.uid !== undefined);
+        assert(linkInfo.count !== undefined);
+        assert(linkInfo.uid != undefined);
+
+        await removeLink(linkInfo.linkid);
     });
 
-    it('fix link.', function () {
+    it('fix link.', async function () {
         let newLink = "testnewlink.com";
-        return addLink(guestInfo, newLink).then((linkInfo) => {
-            assert(linkInfo.link === "http://" + newLink);
-        });
+        await login(guestInfo);
+        let linkInfo = (await addLink(newLink)).body;
+        assert(linkInfo.link === "http://" + newLink);
+
+        await removeLink(linkInfo.linkid);
     });
 
     it('update links.', async function () {
         let oldLink = "http://oldLink.com";
         let newLink = "http://newlink.com";
-        let linkInfo = await addLink(guestInfo, oldLink);
-        await updateLink(guestInfo, linkInfo.linkid, newLink);
-        let links = await getLink(guestInfo);
+        await login(guestInfo);
+        let linkInfo = (await addLink(oldLink)).body;
+        await updateLink(linkInfo.linkid, newLink);
+        let links = (await getLink()).body;
+
+        let flag = false;
         for (let element of links) {
             if (element.linkid === linkInfo.linkid) {
                 assert(element.link === newLink);
+                flag = true;
             }
         }
+        assert(flag);
+
+        await removeLink(linkInfo.linkid);
     });
 
     it('admin update links.', async function () {
         let oldLink = "http://oldLink.com";
         let newLink = "http://newlink.com";
-        let linkInfo = await addLink(guestInfo, oldLink);
-        await updateLink(adminInfo, linkInfo.linkid, newLink);
-        let links = await getLink(guestInfo);
+        await login(guestInfo);
+        let linkInfo = (await addLink(oldLink)).body;
+        await login(adminInfo);
+        await updateLink(linkInfo.linkid, newLink);
+        await login(guestInfo);
+        let links = (await getLink()).body;
+        let flag = false;
         for (let element of links) {
             if (element.linkid === linkInfo.linkid) {
                 assert(element.link === newLink);
+                flag = true;
             }
         }
+        assert(flag);
+
+        await login(guestInfo);
+        await removeLink(linkInfo.linkid);
     });
 
     it('fake admin update links.', async function () {
         let oldLink = "http://oldLink.com";
         let newLink = "http://newlink.com";
-        let linkInfo = await addLink(guestInfo, oldLink);
+        await login(guestInfo);
+        let linkInfo = (await addLink(oldLink)).body;
+
+        await login(fakeadmin);
         try {
-            await updateLink(fakeadmin, linkInfo.linkid, newLink);
-            assert("fakeadmin can't update link." === 0);
-        }
-        catch (err) {
-        }
-        let links = await getLink(guestInfo);
+            await updateLink(linkInfo.linkid, newLink);
+            assert(false);
+        } catch (err) { }
+
+        await login(guestInfo);
+        let links = (await getLink()).body;
+        let flag = false;
         for (let element of links) {
             if (element.linkid === linkInfo.linkid) {
                 assert(element.link === oldLink);
+                flag = true;
             }
         }
+        assert(flag);
+
+        await removeLink(linkInfo.linkid);
     });
 
     it('user remove link.', async function () {
         let newLink = "http://newlink.com";
-        let linkInfo = await addLink(guestInfo, newLink);
-        await removeLink(guestInfo, linkInfo.linkid);
-        let links = await getLink(guestInfo);
+        await login(guestInfo);
+        let linkInfo = (await addLink(newLink)).body;
+        await removeLink(linkInfo.linkid);
+        let links = (await getLink(guestInfo)).body;
+
         for (let element of links) {
             assert(element.linkid !== linkInfo.linkid);
         }
@@ -514,9 +410,14 @@ describe('check link part.', () => {
 
     it('admin remove link.', async function () {
         let newLink = "http://newlink.com";
-        let linkInfo = await addLink(guestInfo, newLink);
-        await removeLink(adminInfo, linkInfo.linkid);
-        let links = await getLink(guestInfo);
+        await login(guestInfo);
+        let linkInfo = (await addLink(newLink)).body;
+
+        await login(adminInfo);
+        await removeLink(linkInfo.linkid);
+        await login(guestInfo);
+        let links = (await getLink()).body;
+
         for (let element of links) {
             assert(element.linkid !== linkInfo.linkid);
         }
@@ -524,27 +425,24 @@ describe('check link part.', () => {
 
     it('fake admin remove link.', async function () {
         let newLink = "http://newlink.com";
-        let linkInfo = await addLink(guestInfo, newLink);
+        await login(guestInfo);
+        let linkInfo = (await addLink(newLink)).body;
+        await login(fakeadmin);
         try {
-            await removeLink(fakeadmin, linkInfo.linkid);
-            assert("fakeadmin can't remove link." === 0);
-        }
-        catch (err) {
-        }
-        let links = await getLink(guestInfo);
-        let linkids = [];
-        for (let element of links) {
-            linkids.push(element.linkid);
-        }
-        assert(linkids.indexOf(linkInfo.linkid) !== -1);
-    });
+            await removeLink(linkInfo.linkid);
+            assert(false);
+        } catch (err) { }
 
-    it('remove links.', async function () {
-        let links = await getLink(guestInfo);
+        await login(guestInfo);
+        let links = (await getLink()).body;
+        let flag = false;
         for (let element of links) {
-            await removeLink(guestInfo, element.linkid);
-        };
-        links = await getLink(guestInfo);
-        assert(links.length === 0);
+            if (element.linkid === linkInfo.linkid) {
+                flag = true;
+            }
+        }
+        assert(flag);
+
+        await removeLink(linkInfo.linkid);
     });
 });

@@ -7,6 +7,7 @@ const bodyParser = require('body-parser')
 const ObjectID = require('mongodb').ObjectID;
 const fs = require('fs');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 
 let router = express.Router();
 let app = express();
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 });
 
 app.use(bodyParser());
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ type: 'application/*+json' }));
@@ -44,3 +46,5 @@ app.get('*', function (req, res) {
 
 app.listen(config.port);
 console.log(`Service started at port ${config.port}.`);
+
+module.exports = app;

@@ -5,6 +5,7 @@ const database = require('./data').database;
 const ObjectID = require('mongodb').ObjectID;
 const config = require('../config');
 const fs = require('fs');
+const cookieParser = require('cookie-parser');
 
 let router = express.Router();
 
@@ -39,8 +40,8 @@ let replaceMongoId = (req, res, next) => {
     next();
 }
 let updateToken = (req, res, next) => {
-    if (req.query.token !== undefined) {
-        database.getTokenByToken(req.query.token).then((tokenResult) => {
+    if (req.cookies.token !== undefined) {
+        database.getTokenByToken(req.cookies.token).then((tokenResult) => {
             let now = new Date();
             if ((now.getTime() > tokenResult.dispose) ||
                 (now.getTime() - tokenResult.create > config.disposeTime * 24 * 60 * 60 * 1000)) {
@@ -48,7 +49,7 @@ let updateToken = (req, res, next) => {
                 return;
             }
             else {
-                database.renewTokenByToken(req.query.token).then((result) => {
+                database.renewTokenByToken(req.cookies.token).then((result) => {
                     next();
                 }, (err) => {
                     res.status(500).send({ err: "database error." })
@@ -83,12 +84,11 @@ let checkEmail = (req, res, next) => {
     });
 }
 let checkToken = (req, res, next) => {
-    req.query.token = req.query.token || req.body.token;
-    if (!req.query.token) {
+    if (!req.cookies.token) {
         res.status(401).send({ err: "token error." });
         return;
     }
-    database.getTokenByToken(req.query.token).then((tokenResult) => {
+    database.getTokenByToken(req.cookies.token).then((tokenResult) => {
         if (!tokenResult) {
             res.status(401).send({ err: "token error." });
         }
@@ -100,11 +100,11 @@ let checkToken = (req, res, next) => {
     });
 }
 let checkAdmin = (req, res, next) => {
-    if (req.query.token === undefined) {
+    if (req.cookies.token === undefined) {
         res.status(401).send({ err: "purview error." });
         return;
     }
-    database.getTokenByToken(req.query.token).then((result) => {
+    database.getTokenByToken(req.cookies.token).then((result) => {
         database.getUserById(result._uid).then((result) => {
             if (result.purview === "admin") {
                 next();
@@ -146,18 +146,18 @@ let checkUserInfo = (req, res, next) => {
     next();
 }
 let checkUserPurview = (req, res, next) => {
-    if (req.query.token === undefined) {
+    if (req.cookies.token === undefined) {
         res.status(401).send({ err: "purview error." });
         return;
     }
-    database.getTokenByToken(req.query.token).then((tokenResult) => {
+    database.getTokenByToken(req.cookies.token).then((tokenResult) => {
         database.getUserById(tokenResult._uid).then((result) => {
-            if (result.purview === "admin") {
-                req.query.purview = "admin";
+            if (result.email === req.query.email) {
+                req.query.purview = "owner";
                 next();
             }
-            else if (result.email === req.query.email) {
-                req.query.purview = "owner";
+            else if (result.purview === "admin") {
+                req.query.purview = "admin";
                 next();
             }
             else {
@@ -181,11 +181,11 @@ let checkUserPurview = (req, res, next) => {
     });
 }
 let checkLinkPurview = (req, res, next) => {
-    if (req.query.token === undefined) {
+    if (req.cookies.token === undefined) {
         res.status(401).send({ err: "purview error." });
         return;
     }
-    database.getTokenByToken(req.query.token).then((tokenResult) => {
+    database.getTokenByToken(req.cookies.token).then((tokenResult) => {
         database.getUserById(tokenResult._uid).then((result) => {
             if (result.purview === "admin") {
                 req.query.purview = "admin";
@@ -301,7 +301,8 @@ let login = (req, res) => {
     database.getUserByEmail(userInfo.email).then((userResult) => {
         database.removeToken(userResult._id).then(() => {
             database.insertToken(userResult._id).then((newToken) => {
-                res.cookie("token",newToken.token,{maxAge:config.renewTime*86400000});
+                res.clearCookie("token");
+                res.cookie("token", newToken.token, { maxAge: config.renewTime * 86400000 });
                 userResult.token = newToken.token;
                 userResult.tokenDispose = newToken.dispose;
                 res.type('application/json');
@@ -317,6 +318,11 @@ let login = (req, res) => {
         }
     });
 }
+let logout = (req, res) => {
+    res.clearCookie("token");
+    res.type('application/json');
+    res.status(204).send({});
+}
 let addUser = (req, res) => {
     let userInfo = {
         name: req.query.name,
@@ -327,9 +333,8 @@ let addUser = (req, res) => {
 
     database.insertUser(userInfo).then((result) => {
         database.insertToken(result._id).then((tokenInfo) => {
-            res.cookie("token",newToken.token,{maxAge:config.renewTime*86400000});
-            result.token = tokenInfo.token;
-            result.tokenDispose = tokenInfo.dispose;
+            res.clearCookie("token");
+            res.cookie("token", tokenInfo.token, { maxAge: config.renewTime * 86400000 });
             result.purview = "user";
             res.type('application/json');
             res.status(201).send(result);
@@ -382,6 +387,9 @@ let getUser = (req, res) => {
 let removeUser = (req, res) => {
     if (req.query._uid !== undefined) {
         database.removeUserById(req.query._uid).then((result) => {
+            if (req.query.purview === "owner") {
+                res.clearCookie("token");
+            }
             res.status(204).send({});
         }, (err) => {
             res.status(500).send({ err: "database error." });
@@ -389,6 +397,9 @@ let removeUser = (req, res) => {
     }
     else if (req.query.email !== undefined) {
         database.removeUserByEmail(req.query.email).then((result) => {
+            if (req.query.purview === "owner") {
+                res.clearCookie("token");
+            }
             res.status(204).send({});
         }, (err) => {
             res.status(500).send({ err: "database error." });
@@ -444,7 +455,7 @@ let routeLink = (req, res) => {
         res.status(500).send({ err: "database error." });
         return;
     });
-    
+
 }
 
 
@@ -504,6 +515,7 @@ router.put('/user', updateUser);
 router.get('/user', getUser);
 
 router.get('/login', login);
+router.delete('/login', logout);
 
 router.get('/route', routeLink);
 
