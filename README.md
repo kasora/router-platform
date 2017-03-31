@@ -7,14 +7,14 @@
 |------|---|-------|----|-------|-------|------|------|
 |[√]|链接跳转|GET|/api/route|uid| | |guest+|
 |[√]|用户登录|POST|/api/login|email, password| |userinfo|guest|
-|[√]|用户注销|DELETE|/api/login|token| |empty_doc|owner|
+|[√]|用户注销|DELETE|/api/login| | |empty_doc|owner|
 |[√]|用户查询|GET|/api/user|uid/email| |name, email|guest+|
 |[√]|用户注册|POST|/api/user|email, password|name|userinfo|guest|
-|[√]|用户更新|PUT|/api/user|token, email|name, password|userinfo|owner+|
-|[√]|用户封停|DELETE|/api/user|token, email| |empty_doc|admin|
-|[√]|查询链接|GET|/api/link|token|page, per_page|links|owner+|
-|[√]|添加链接|POST|/api/link|token, link| |link|user+|
-|[√]|修改链接|PUT|/api/link|token, linkid, newlink| |link|owner+|
-|[√]|删除链接|DELETE|/api/link|token, linkid| |empty_doc|owner+|
+|[√]|用户更新|PUT|/api/user|email|name, password|userinfo|owner+|
+|[√]|用户封停|DELETE|/api/user|email| |empty_doc|admin|
+|[√]|查询链接|GET|/api/link| |page, per_page|links|owner+|
+|[√]|添加链接|POST|/api/link|link| |link|user+|
+|[√]|修改链接|PUT|/api/link|linkid, newlink| |link|owner+|
+|[√]|删除链接|DELETE|/api/link|linkid| |empty_doc|owner+|
 
 userinfo: name, email, _id, purview
