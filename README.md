@@ -11,7 +11,7 @@
 |[√]|用户注册|POST|/api/user|email, password|name|userinfo|guest|
 |[√]|用户更新|PUT|/api/user|token, email|name, password|userinfo|owner+|
 |[√]|用户封停|DELETE|/api/user|token, email| |empty_doc|admin|
-|[√]|查询链接|GET|/api/link|token|page, per_page|link|owner+|
+|[√]|查询链接|GET|/api/link|token|page, per_page|links|owner+|
 |[√]|添加链接|POST|/api/link|token, link| |link|user+|
 |[√]|修改链接|PUT|/api/link|token, linkid, newlink| |link|owner+|
 |[√]|删除链接|DELETE|/api/link|token, linkid| |empty_doc|owner+|

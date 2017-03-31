@@ -301,6 +301,7 @@ let login = (req, res) => {
     database.getUserByEmail(userInfo.email).then((userResult) => {
         database.removeToken(userResult._id).then(() => {
             database.insertToken(userResult._id).then((newToken) => {
+                res.cookie("token",newToken.token,{maxAge:config.renewTime*86400000});
                 userResult.token = newToken.token;
                 userResult.tokenDispose = newToken.dispose;
                 res.type('application/json');
@@ -326,6 +327,7 @@ let addUser = (req, res) => {
 
     database.insertUser(userInfo).then((result) => {
         database.insertToken(result._id).then((tokenInfo) => {
+            res.cookie("token",newToken.token,{maxAge:config.renewTime*86400000});
             result.token = tokenInfo.token;
             result.tokenDispose = tokenInfo.dispose;
             result.purview = "user";
