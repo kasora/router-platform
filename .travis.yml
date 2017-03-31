@@ -7,6 +7,5 @@
     "group": "stable",
     "dist": "precise",
     "os": "linux",
-    "services":
-        mongodb
+    "services": "mongodb"
 }
