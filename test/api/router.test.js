@@ -327,6 +327,16 @@ describe('check link part.', () => {
         await removeLink(linkInfo.linkid);
     });
 
+    it('anonymous get info.', async function () {
+        await logout();
+
+        try {
+            let links = (await getLink()).body;
+            assert(false);
+        }
+        catch (err) { }
+    });
+
     it('update links.', async function () {
         let oldLink = "http://oldLink.com";
         let newLink = "http://newlink.com";
