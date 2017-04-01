@@ -3,7 +3,6 @@
 const assert = require('assert');
 const md5 = require('md5');
 const randomstring = require('randomstring');
-const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const config = require('../../config');
 const mongoway = require('../../dataoption/mongoway');
 const request = require('supertest');
