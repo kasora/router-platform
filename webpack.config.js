@@ -1,3 +1,4 @@
+const path = require('path');
 const webpack = require('webpack');
 
 module.exports = {
@@ -14,13 +15,18 @@ module.exports = {
             {
                 test: /\.js|jsx$/,
                 exclude: /node_modules/,
-                loaders: ['babel-loader']
+                loader: 'babel-loader',
+                query: {
+                    presets: ['react', 'es2015'],
+                    plugins: ['transform-class-properties']
+                }
             },
             {
                 test: /\.css$/,
                 loaders: ['style-loader', 'css-loader']
             }
         ]
+
     },
     plugins: [
         new webpack.DefinePlugin({
@@ -28,10 +34,7 @@ module.exports = {
                 'NODE_ENV': JSON.stringify('production')
             }
         }),
-        new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: true
-            }
-        })
+
     ]
 }
+
