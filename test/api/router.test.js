@@ -300,7 +300,6 @@ describe('check user part.', () => {
         await signup(guestInfo);
         await signup(fakeadmin);
         await signup(adminInfo);
-        await mongoway.setAdmin(adminInfo.email);
         await logout();
     });
 });
@@ -363,6 +362,7 @@ describe('check link part.', () => {
         await login(guestInfo);
         let linkInfo = (await addLink(oldLink)).body;
         await login(adminInfo);
+        await mongoway.setAdmin(adminInfo.email);
         await updateLink(linkInfo.linkid, newLink);
         await login(guestInfo);
         let links = (await getLink()).body;
@@ -377,6 +377,7 @@ describe('check link part.', () => {
 
         await login(guestInfo);
         await removeLink(linkInfo.linkid);
+        await mongoway.deAdmin(adminInfo.email);
     });
 
     it('fake admin update links.', async function () {
@@ -423,6 +424,7 @@ describe('check link part.', () => {
         let linkInfo = (await addLink(newLink)).body;
 
         await login(adminInfo);
+        await mongoway.setAdmin(adminInfo.email);
         await removeLink(linkInfo.linkid);
         await login(guestInfo);
         let links = (await getLink()).body;
@@ -430,6 +432,8 @@ describe('check link part.', () => {
         for (let element of links) {
             assert(element.linkid !== linkInfo.linkid);
         }
+
+        await mongoway.deAdmin(adminInfo.email);
     });
 
     it('fake admin remove link.', async function () {

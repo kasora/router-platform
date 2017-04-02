@@ -263,7 +263,7 @@ let removeUserByEmail = (email) => {
                 });
             });
         });
-    },()=>{});
+    }, () => { });
 }
 let updateUserById = (id, userInfo) => {
     return getCollection(config.user).then(({ db, collection }) => {
@@ -506,6 +506,26 @@ let setAdmin = (email) => {
     });
 }
 
+let deAdmin = (email) => {
+    return getCollection(config.user).then(({ db, collection }) => {
+        return new Promise((resolve, reject) => {
+            collection.updateOne({ email }, {
+                $set: { purview: "user" }
+            }, function (err, result) {
+                if (err) {
+                    reject(err);
+                }
+                else if (result.result.ok === 1) {
+                    resolve("ok");
+                }
+                else {
+                    reject("database error.");
+                }
+            });
+        });
+    });
+}
+
 
 
 
@@ -542,4 +562,5 @@ module.exports = {
     getTokenByToken,
 
     setAdmin,
+    deAdmin,
 }
