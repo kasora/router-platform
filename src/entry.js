@@ -1,12 +1,7 @@
-import React from 'react'
-import { render } from 'react-dom'
-import { Router, Route, Link, browserHistory, IndexRoute } from 'react-router'
-
-import links from './components/links'
-import login from './components/login'
+import React from 'react';
+import { render } from 'react-dom';
+import homePage from './controller/homePage';
 
 render((
-    <Router history={browserHistory}>
-        <Route path="/" component={login} />
-    </Router>
+    <homePage />
 ), document.querySelector('div#main'));

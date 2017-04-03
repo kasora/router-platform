@@ -11,7 +11,7 @@ Router Platform
 |已完成|API|请求方式|接口|必要参数|可选参数|返回值|所需权限|
 |------|---|-------|----|-------|-------|------|------|
 |[√]|链接跳转|GET|/api/route|uid| | |guest+|
-|[√]|用户登录|POST|/api/login|email, password| |userinfo|guest|
+|[√]|用户登录|GET|/api/login|email, password| |userinfo|guest|
 |[√]|用户注销|DELETE|/api/login| | |empty_doc|owner|
 |[√]|用户查询|GET|/api/user|uid/email| |name, email|guest+|
 |[√]|用户注册|POST|/api/user|email, password|name|userinfo|guest|

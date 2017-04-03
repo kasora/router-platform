@@ -73,4 +73,4 @@ request.head = function (url, options) {
     return common('HEAD', url, undefined, options);
 }
 
-export default request;
+module.exports = request;

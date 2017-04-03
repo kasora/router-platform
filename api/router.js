@@ -301,7 +301,6 @@ let login = (req, res) => {
     database.getUserByEmail(userInfo.email).then((userResult) => {
         database.removeToken(userResult._id).then(() => {
             database.insertToken(userResult._id).then((newToken) => {
-                res.clearCookie("token");
                 res.cookie("token", newToken.token, { maxAge: config.renewTime * 86400000 });
                 userResult.token = newToken.token;
                 userResult.tokenDispose = newToken.dispose;
@@ -333,7 +332,6 @@ let addUser = (req, res) => {
 
     database.insertUser(userInfo).then((result) => {
         database.insertToken(result._id).then((tokenInfo) => {
-            res.clearCookie("token");
             res.cookie("token", tokenInfo.token, { maxAge: config.renewTime * 86400000 });
             result.purview = "user";
             res.type('application/json');
@@ -483,7 +481,10 @@ router.use(['/user', '/login'], (req, res, next) => {
 });
 
 router.use(replaceMongoId);
-router.use(updateToken);
+router.use(['/link','/route'],updateToken);
+router.get('/user',updateToken);
+router.put('/user',updateToken);
+router.delete('/user',updateToken);
 
 router.post('/user', checkUserInfo);
 router.post('/user', (req, res, next) => {
