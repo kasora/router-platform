@@ -2,13 +2,13 @@
 
 let AppDispatcher = require('../dispatcher/AppDispatcher');
 
-let ButtonActions = {
-  addNewItem: function (userinfo) {
+let UserActions = {
+  login: function (userinfo) {
     AppDispatcher.dispatch({
-      actionType: "USER_LOGIN",
+      actionType: "USER_SIGNUP",
       userinfo,
     });
   },
 };
 
-module.exports = ButtonActions;
+module.exports = UserActions;

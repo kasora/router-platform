@@ -59,4 +59,4 @@ class Links extends Component {
   }
 }
 
-export default Links;
+module.exports = Links;

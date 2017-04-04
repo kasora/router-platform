@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'react-dom';
-import homePage from './controller/homePage';
+import HomePageController from './controller/HomePageController';
 
 render((
-    <homePage />
+    <HomePageController />
 ), document.querySelector('div#main'));

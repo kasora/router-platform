@@ -3,25 +3,15 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { browserHistory, Router, Route, IndexRoute, Link } from 'react-router';
-const md5 = require('md5');
-const request = require('../utils/http');
 
-class Login extends Component {
+class Signup extends Component {
   constructor() {
     super();
   }
 
   submitHandle = (event) => {
     event.preventDefault();
-    let data = {
-      password: md5(React.findDOMNode(this.refs.password).value),
-      email: React.findDOMNode(this.refs.email).value,
-      name: React.findDOMNode(this.refs.name).value,
-    }
-    request.post('/api/user', data).then((res) => {
-      window.userInfo = res;
-      console.log(window.userInfo);
-    });    
+    this.props.onSubmit.call(this);
   }
 
   render() {
@@ -53,4 +43,4 @@ class Login extends Component {
   }
 }
 
-export default Login;
+module.exports = Signup;

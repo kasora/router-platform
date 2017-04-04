@@ -193,6 +193,19 @@ describe('check user part.', () => {
         await remove(guestInfo);
     });
 
+    it('get self info by token', async function () {
+        await signup(guestInfo);
+        
+        let userinfo = await agent
+            .get('/api/user')
+            .set("Content-Type", "application/x-www-form-urlencoded")
+            .expect(200);
+        console.log(userinfo);
+        console.log(guestInfo);
+
+        await remove(guestInfo);
+    });
+
     it('purview up', async function () {
         await signup(guestInfo);
 

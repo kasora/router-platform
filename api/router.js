@@ -378,6 +378,27 @@ let getUser = (req, res) => {
             }
         });
     }
+    else if (req.cookies.token != undefined) {
+        database.getTokenByToken(req.cookies.token).then(tokenResult => {
+            database.getUserById(tokenResult._uid).then(result => {
+                res.status(200).send({
+                    _id: result._id,
+                    name: result.name,
+                    email: result.email,
+                    purview: result.purview,
+                });
+            }, (err) => {
+                if (err === "user error.") {
+                    res.status(404).send({ err });
+                }
+                else {
+                    res.status(500).send({ err: "database error." });
+                }
+            });
+        }, (err) => {
+            res.status(400).send({ err: "token error" });
+        });
+    }
     else {
         res.status(404).send({ err: "userinfo error." });
     }
@@ -481,10 +502,10 @@ router.use(['/user', '/login'], (req, res, next) => {
 });
 
 router.use(replaceMongoId);
-router.use(['/link','/route'],updateToken);
-router.get('/user',updateToken);
-router.put('/user',updateToken);
-router.delete('/user',updateToken);
+router.use(['/link', '/route'], updateToken);
+router.get('/user', updateToken);
+router.put('/user', updateToken);
+router.delete('/user', updateToken);
 
 router.post('/user', checkUserInfo);
 router.post('/user', (req, res, next) => {

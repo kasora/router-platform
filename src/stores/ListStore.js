@@ -4,27 +4,26 @@ var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
 var ListStore = assign({}, EventEmitter.prototype, {
-  items: [],
   userinfo:{},
 
-  getAll: function () {
-    return this.items;
+  getUserinfo: function () {
+    return this.userinfo;
   },
 
-  loginHandler: function (userinfo) {
-    this.items.push(userinfo);
+  signupHandler: function (userinfo) {
+    this.userinfo = userinfo;
   },
 
-  emitLogin: function(){
-    this.emit('login');
+  emitSignup: function(){
+    this.emit('signup');
   },
 
-  addChangeListener: function (callback) {
-    this.on('login', callback);
+  addSignupListener: function (callback) {
+    this.on('signup', callback);
   },
 
-  removeChangeListener: function (callback) {
-    this.removeListener('login', callback);
+  removeSignupListener: function (callback) {
+    this.removeListener('signup', callback);
   }
 });
 

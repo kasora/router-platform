@@ -6,9 +6,9 @@ var ListStore = require('../stores/ListStore');
 
 AppDispatcher.register(function (action) {
   switch (action.actionType) {
-    case 'USER_LOGIN':
-      ListStore.loginHandler(action.userinfo);
-      ListStore.emitLogin();
+    case 'USER_SIGNUP':
+      ListStore.signupHandler(action.userinfo);
+      ListStore.emitSignup();
       break;
     default:
       break;
