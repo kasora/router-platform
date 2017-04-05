@@ -9,9 +9,6 @@ const cookieParser = require('cookie-parser');
 
 let router = express.Router();
 
-
-
-
 let replaceMongoId = (req, res, next) => {
     if (req.query.uid !== undefined) {
         if (config.dataWay === "mongodb") {

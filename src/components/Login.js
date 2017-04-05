@@ -9,24 +9,23 @@ const md5 = require('md5');
 const request = require('../utils/http');
 const ListStore = require('../stores/ListStore');
 
-class Signup extends Component {
-  constructor(props) {
-    super(props);
+class Login extends Component {
+  constructor() {
+    super();
   }
 
   submitHandle = (event) => {
     event.preventDefault();
-    this.userSignup();
+    this.userLogin();
   }
 
-  userSignup() {
+  userLogin() {
     let data = {
       password: md5(this.refs.password.value),
       email: this.refs.email.value,
-      name: this.refs.name.value,
     }
-    request.post('/api/user', data).then((res) => {
-      UserActions.signup(res);
+    request.get('/api/login', data).then((res) => {
+      UserActions.login(res);
       browserHistory.push('/');
     });
   }
@@ -36,11 +35,6 @@ class Signup extends Component {
       <div id="login">
         <h3 className="blockTitle">Login</h3>
         <form action="/api/user" method="post" encType="application/x-www-form-urlencoded" onSubmit={this.submitHandle}>
-
-          <div className="form-group">
-            <label for="exampleInputEmail1">User name</label>
-            <input ref="name" name="name" type="text" className="form-control" id="inputName" placeholder="Name" />
-          </div>
 
           <div className="form-group">
             <label for="exampleInputEmail1">Email address</label>
@@ -60,4 +54,4 @@ class Signup extends Component {
   }
 }
 
-module.exports = Signup;
+module.exports = Login;

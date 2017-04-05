@@ -10,6 +10,14 @@ AppDispatcher.register(function (action) {
       ListStore.signupHandler(action.userinfo);
       ListStore.emitSignup();
       break;
+    case 'USER_LOGIN':
+      ListStore.loginHandler(action.userinfo);
+      ListStore.emitLogin();
+      break;
+    case 'USER_INFO':
+      ListStore.infoHandler(action.userinfo);
+      ListStore.emitLogin();
+      break;
     default:
       break;
   }

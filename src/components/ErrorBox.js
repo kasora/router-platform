@@ -1,12 +1,12 @@
 'use strict';
 
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import { render } from 'react-dom';
 import { browserHistory, Router, Route, IndexRoute, Link } from 'react-router';
 const md5 = require('md5');
 const request = require('../utils/http');
 
-class Error extends Component {
+class ErrorBox extends Component {
     constructor(props) {
         super(props);
     }
@@ -14,10 +14,10 @@ class Error extends Component {
     render() {
         return (
             <div>
-                Request error: {props.error}
+                <h1>Error: {this.props.error}</h1>
             </div>
         )
     }
 }
 
-module.exports = Error
+module.exports = ErrorBox;

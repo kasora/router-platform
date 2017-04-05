@@ -1,17 +1,17 @@
 'use strict';
 
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+import { render } from 'react-dom';
 import request from '../utils/http';
 import { browserHistory, Router, Route, IndexRoute, Link } from 'react-router';
 
 class Links extends Component {
   constructor() {
     super();
+
     this.state = {
-      links: [],
-      error: false,
-    }
+
+    };
     request.get('/api/link').then((allLink) => {
       this.setState({
         links: allLink.sort(),
@@ -24,7 +24,7 @@ class Links extends Component {
   }
 
   render() {
-    if (!err) {
+    if (this.state.links) {
       return (
         <div>
           <h3 className="blockTitle">Links</h3>

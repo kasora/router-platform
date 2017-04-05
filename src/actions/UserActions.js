@@ -3,9 +3,21 @@
 let AppDispatcher = require('../dispatcher/AppDispatcher');
 
 let UserActions = {
-  login: function (userinfo) {
+  signup: function (userinfo) {
     AppDispatcher.dispatch({
       actionType: "USER_SIGNUP",
+      userinfo,
+    });
+  },
+  login: function (userinfo) {
+    AppDispatcher.dispatch({
+      actionType: "USER_LOGIN",
+      userinfo,
+    });
+  },
+  getInfo: function (userinfo) {
+    AppDispatcher.dispatch({
+      actionType: "USER_INFO",
       userinfo,
     });
   },
