@@ -21,6 +21,12 @@ let UserActions = {
       userinfo,
     });
   },
+  signout: function (userinfo) {
+    AppDispatcher.dispatch({
+      actionType: "USER_SIGNOUT",
+      userinfo,
+    });
+  }
 };
 
 module.exports = UserActions;

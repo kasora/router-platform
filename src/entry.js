@@ -4,13 +4,8 @@ import { Router, Route, Link, browserHistory, IndexRoute, IndexRedirect } from '
 
 import HomePageController from './controller/HomePageController';
 const PassportController = require('./controller/PassportController');
+const Title = require('./components/Title');
 
 render((
-    <Router history={browserHistory}>
-        <Route path='/'>
-            <IndexRoute component={HomePageController} />
-            <Route path='/index' component={HomePageController} />
-            <Route path='/passport/:action' component={PassportController} />
-        </Route>
-    </Router>
+    <HomePageController />
 ), document.querySelector('div#main'));

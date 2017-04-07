@@ -24,7 +24,7 @@ class Login extends Component {
       password: md5(this.refs.password.value),
       email: this.refs.email.value,
     }
-    request.get('/api/login', data).then((res) => {
+    request.get(`/api/login?email=${data.email}&password=${data.password}`).then((res) => {
       UserActions.login(res);
       browserHistory.push('/');
     });
@@ -33,20 +33,35 @@ class Login extends Component {
   render() {
     return (
       <div id="login">
-        <h3 className="blockTitle">Login</h3>
-        <form action="/api/user" method="post" encType="application/x-www-form-urlencoded" onSubmit={this.submitHandle}>
+        <h3 style={{ "margin-top": 0 }} className="blockTitle">Login</h3>
+        <form action="/api/user" method="post" className="form-horizontal ng-pristine ng-valid" encType="application/x-www-form-urlencoded" onSubmit={this.submitHandle}>
 
           <div className="form-group">
-            <label for="exampleInputEmail1">Email address</label>
-            <input ref="email" name="email" type="email" className="form-control" id="inputEmail" placeholder="Email" />
+            <label for="inputPassword" className="col-lg-2 control-label">Email</label>
+            <div className="col-lg-10">
+              <input ref="email" name="email" type="email" className="form-control" id="inputEmail" placeholder="Email" />
+            </div>
           </div>
 
           <div className="form-group">
-            <label for="exampleInputPassword1">Password</label>
-            <input ref="password" name="password" type="password" className="form-control" id="inputPassword" placeholder="Password" />
+            <label for="inputPassword" className="col-lg-2 control-label">Password</label>
+            <div className="col-lg-10">
+              <input ref="password" name="password" type="password" className="form-control" id="inputPassword" placeholder="Password" />
+              <div className="checkbox">
+                <label>
+                  <input type="checkbox" />Remenber me
+                </label>
+              </div>
+            </div>
           </div>
 
-          <button type="submit" className="btn btn-default">Submit</button>
+          <div className="form-group">
+            <div className="col-lg-10 col-lg-offset-2">
+              <button type="reset" className="btn btn-default">Cancel</button>
+              &nbsp;
+              <button type="submit" className="btn btn-primary">Submit</button>
+            </div>
+          </div>
 
         </form>
       </div>

@@ -6,18 +6,17 @@ import { render } from 'react-dom';
 const UserActions = require('../actions/UserActions');
 const ListStore = require('../stores/ListStore');
 const request = require('../utils/http');
-const User = require('./User');
+const Title = require('./Title');
 const Links = require('./Links');
 
 class HomePage extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
   }
 
   render() {
     return (
       <div>
-        <User username={this.props.userinfo.name} />
         <Links />
       </div>
     )

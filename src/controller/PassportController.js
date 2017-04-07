@@ -13,8 +13,7 @@ class PassportController extends Component {
     super(props);
   }
 
-  render() {
-    console.log(this.props.params.action);
+  render() {    
     if (this.props.params.action === "login") {
       return (
         <Login />

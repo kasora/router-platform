@@ -4,7 +4,9 @@ var EventEmitter = require('events').EventEmitter;
 var assign = require('object-assign');
 
 var ListStore = assign({}, EventEmitter.prototype, {
-  userinfo: {},
+  userinfo: {
+    name:"guest",
+  },
 
   getUserinfo: function () {
     return this.userinfo;
@@ -31,23 +33,33 @@ var ListStore = assign({}, EventEmitter.prototype, {
   },
 
   emitLogin: function () {
-    this.emit('Login');
+    this.emit('login');
   },
   addLoginListener: function (callback) {
-    this.on('Login', callback);
+    this.on('login', callback);
   },
   removeLoginListener: function (callback) {
-    this.removeListener('Login', callback);
+    this.removeListener('login', callback);
   },
 
   emitInfo: function () {
-    this.emit('Info');
+    this.emit('info');
   },
   addInfoListener: function (callback) {
-    this.on('Info', callback);
+    this.on('info', callback);
   },
   removeInfoListener: function (callback) {
-    this.removeListener('Info', callback);
+    this.removeListener('info', callback);
+  },
+
+  emitSignout: function () {
+    this.emit('signout');
+  },
+  addSignoutListener: function (callback) {
+    this.on('signout', callback);
+  },
+  removeSignoutListener: function (callback) {
+    this.removeListener('signout', callback);
   },
 
 });

@@ -12,7 +12,10 @@ module.exports = {
 
     adminEamil: "test@test.com",
     adminPassword: "testpassword",
-    
+
     disposeTime: 15,
-    renewTime: 1
+    renewTime: 1,
+
+
+    site: "https://route.kasora.moe",
 }

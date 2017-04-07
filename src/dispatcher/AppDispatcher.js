@@ -18,6 +18,10 @@ AppDispatcher.register(function (action) {
       ListStore.infoHandler(action.userinfo);
       ListStore.emitLogin();
       break;
+    case 'USER_SIGNOUT':
+      ListStore.infoHandler(action.userinfo);
+      ListStore.emitSignout();
+      break;
     default:
       break;
   }
