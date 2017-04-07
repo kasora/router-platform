@@ -30,6 +30,8 @@ class HomePageController extends Component {
     if (ListStore.getUserinfo().name === "guest") {
       request.get('/api/user').then(res => {
         UserActions.getInfo(res);
+      },(err)=>{
+        
       });
     }
   }
