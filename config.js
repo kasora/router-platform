@@ -17,5 +17,5 @@ module.exports = {
     renewTime: 1,
 
 
-    site: "http://192.168.5.133:12450",
+    site: "http://yoursite.com",
 }
