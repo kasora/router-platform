@@ -27,6 +27,9 @@ class Login extends Component {
     request.get(`/api/login?email=${data.email}&password=${data.password}`).then((res) => {
       UserActions.login(res);
       browserHistory.push('/');
+    }, (err) => {
+      this.refs.password.parentNode.classList.add("has-error");
+      this.refs.password.parentNode.parentNode.firstChild.innerHTML = "Email (password error.)";
     });
   }
 
@@ -47,12 +50,13 @@ class Login extends Component {
             <label for="inputPassword" className="col-lg-2 control-label">Password</label>
             <div className="col-lg-10">
               <input ref="password" name="password" type="password" className="form-control" id="inputPassword" placeholder="Password" />
-              <div className="checkbox">
-                <label>
-                  <input type="checkbox" />Remenber me
-                </label>
-              </div>
             </div>
+          </div>
+
+          <div className="checkbox">
+            <label>
+              <input type="checkbox" />Remenber me
+            </label>
           </div>
 
           <div className="form-group">

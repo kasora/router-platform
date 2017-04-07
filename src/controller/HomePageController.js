@@ -16,7 +16,7 @@ const Title = require('../components/Title');
 class HomePageController extends Component {
   constructor(props) {
     super(props);
-
+    
     this.state = {
       userinfo: ListStore.getUserinfo()
     }
@@ -58,7 +58,6 @@ class HomePageController extends Component {
       );
     }
     else {
-      console.log("2");
       return (
         <div>
           <Title userinfo={this.state.userinfo} />

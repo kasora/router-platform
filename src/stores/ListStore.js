@@ -12,12 +12,6 @@ var ListStore = assign({}, EventEmitter.prototype, {
     return this.userinfo;
   },
 
-  signupHandler: function (userinfo) {
-    this.userinfo = userinfo;
-  },
-  loginHandler: function (userinfo) {
-    this.userinfo = userinfo;
-  },
   infoHandler: function (userinfo) {
     this.userinfo = userinfo;
   },

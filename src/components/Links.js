@@ -29,8 +29,23 @@ class Links extends Component {
     });
   }
 
-  deleteHandle(event) {
-
+  deleteHandle = (event) => {
+    let row = event.target.parentNode.parentNode;
+    let offset = row.getAttribute("offset");
+    let linkid = this.state.links[offset].linkid;
+    let link = row.firstChild.firstChild.value;
+    row.classList.remove("info");
+    row.classList.add("warning");
+    row.childNodes[3].innerHTML = "pending";
+    request.delete(`/api/link?linkid=${linkid}`).then((res) => {
+      row.classList.remove("warning");
+      row.childNodes[3].innerHTML = "";
+      this.renewLinks();
+    }, (err) => {
+      row.classList.remove("warning");
+      row.classList.add("danger");
+      row.childNodes[3].innerHTML = "error";
+    });
   }
 
   updateHandle = (event) => {
@@ -41,11 +56,11 @@ class Links extends Component {
     row.classList.remove("info");
     row.classList.add("warning");
     row.childNodes[3].innerHTML = "pending";
-    request.put(`/api/link?linkid=${linkid}&newlink=${link}`).then(() => {
+    request.put(`/api/link?linkid=${linkid}&newlink=${link}`).then((res) => {
       row.classList.remove("warning");
       row.classList.add("success");
       row.childNodes[3].innerHTML = "success";
-    }, () => {
+    }, (err) => {
       row.classList.remove("warning");
       row.classList.add("danger");
       row.childNodes[3].innerHTML = "error";
@@ -95,8 +110,8 @@ class Links extends Component {
                         <input offset={offset} className="form-control" value={link.link} onChange={this.onLinkChange} />
                       </td>
                       <td>
-                        <a href={`${config.site}/api/route?id=${link.linkid}`}>
-                          {`${config.site}/api/route?id=${link.linkid}`}
+                        <a href={`${config.site}/api/route?linkid=${link.linkid}`}>
+                          {`${config.site}/api/route?linkid=${link.linkid}`}
                         </a>
                       </td>
                       <td>
@@ -105,7 +120,8 @@ class Links extends Component {
                       <td>
                       </td>
                       <td>
-                        <button className="btn btn-default" onClick={this.updateHandle}>update</button>
+                        <button className="btn btn-default" onClick={this.updateHandle}>update</button>&nbsp;
+                        <button className="btn btn-default" onClick={this.deleteHandle}>delete</button>
                       </td>
                     </tr>
                   )

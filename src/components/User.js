@@ -41,21 +41,41 @@ class User extends Component {
   }
 
   render() {
-    return (
-      <div data-uib-dropdown="" style={{ display: "inline-block" }} className="dropdown">
-        <ul className="nav navbar-nav">
-          <a onClick={this.clickHandle} href="" data-uib-dropdown-toggle="" class="dropdown-toggle" aria-haspopup="true" aria-expanded={this.state.open}>
-            {this.props.userinfo.name || "guest"}
-            <span class="caret"></span>
-          </a>
-          <ul className="dropdown-menu" data-uib-dropdown-menu="">
-            <li><a href="/passport/login">Login</a></li>
-            <li><a href="/passport/signup">Sign up</a></li>
-            <li><a href="/" onClick={this.signout}>Sign out</a></li>
+    if (this.props.userinfo.name === "guest") {
+      return (
+        <div data-uib-dropdown="" style={{ display: "inline-block" }} className="dropdown">
+          <ul className="nav navbar-nav">
+            <li className="dropdown">
+              <a onClick={this.clickHandle} href="" data-uib-dropdown-toggle="" class="dropdown-toggle" aria-haspopup="true" aria-expanded={this.state.open}>
+                {this.props.userinfo.name || "guest"}
+                <span className="caret"></span>
+              </a>
+              <ul className="dropdown-menu" data-uib-dropdown-menu="">
+                <li><a href="/passport/login">Login</a></li>
+                <li><a href="/passport/signup">Sign up</a></li>
+              </ul>
+            </li>
           </ul>
-        </ul>
-      </div>
-    );
+        </div>
+      );
+    }
+    else {
+      return (
+        <div data-uib-dropdown="" style={{ display: "inline-block" }} className="dropdown">
+          <ul className="nav navbar-nav">
+            <li className="dropdown">
+              <a onClick={this.clickHandle} href="" data-uib-dropdown-toggle="" class="dropdown-toggle" aria-haspopup="true" aria-expanded={this.state.open}>
+                {this.props.userinfo.name || "guest"}
+                <span className="caret"></span>
+              </a>
+              <ul className="dropdown-menu" data-uib-dropdown-menu="">
+                <li><a href="/" onClick={this.signout}>Sign out</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      );
+    }
   }
 }
 

@@ -5,7 +5,7 @@
 */
 
 function common(method, url, data, options) {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         options = options || {};
         xhr.open(method, url);
@@ -33,7 +33,12 @@ function common(method, url, data, options) {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === xhr.DONE) {
                 if (xhr.responseText === "") {
-                    resolve({});
+                    if (xhr.status === 204) {
+                        resolve({});
+                    }
+                    else {
+                        reject({ err: "network error" });
+                    }
                 }
                 else {
                     let res = JSON.parse(xhr.responseText);
@@ -46,7 +51,6 @@ function common(method, url, data, options) {
                 }
             }
         };
-
         xhr.send(data);
     });
 }

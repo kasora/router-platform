@@ -8,6 +8,7 @@ const UserActions = require('../actions/UserActions');
 const md5 = require('md5');
 const request = require('../utils/http');
 const ListStore = require('../stores/ListStore');
+require('classlist-polyfill');
 
 class Signup extends Component {
   constructor(props) {
@@ -25,10 +26,21 @@ class Signup extends Component {
       email: this.refs.email.value,
       name: this.refs.name.value,
     }
-    request.post('/api/user', data).then((res) => {
-      UserActions.signup(res);
-      browserHistory.push('/');
-    });
+    if (data.name !== "guest") {
+      request.post('/api/user', data).then((res) => {
+        UserActions.signup(res);
+        browserHistory.push('/');
+      }, (err) => {
+        this.refs.email.value = "";
+        this.refs.email.parentNode.classList.add("has-error");
+        this.refs.email.parentNode.parentNode.firstChild.innerHTML = "Email (Email is exist, sorry.)";
+      });
+    }
+    else {
+      this.refs.name.value = "";
+      this.refs.name.parentNode.classList.add("has-error");
+      this.refs.name.parentNode.parentNode.firstChild.innerHTML = "Name (select another name, please.)";
+    }
   }
 
   render() {

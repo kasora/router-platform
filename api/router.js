@@ -457,7 +457,7 @@ let updateUser = (req, res) => {
 
 
 let routeLink = (req, res) => {
-    database.getLinkById(req.query._id).then((result) => {
+    database.getLinkById(req.query._linkid).then((result) => {
         if (!result) {
             res.status(404).send({ err: "id error." });
             return;
@@ -465,7 +465,7 @@ let routeLink = (req, res) => {
         else {
             res.type('html')
             res.send(`<script>window.location.href='${result.link}';</script>`);
-            database.addCountById(req.query._id);
+            database.addCountById(req.query._linkid);
         }
     }, (err) => {
         res.status(500).send({ err: "database error." });

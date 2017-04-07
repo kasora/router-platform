@@ -15,15 +15,17 @@ class Title extends Component {
 
   render() {
     return (
-      <div className="container-fluid">
-        <div className="navbar-header">
-          <a className="navbar-brand" href="/">Kasora Link</a>
-        </div>
-        <ul className="nav navbar-nav navbar-right">
-          <div className="navbar-collapse collapse" data-uib-collapse="!isCollapsed1" aria-expanded="false" aria-hidden="true" style={{ "height": "0px" }}>
-            <User userinfo={this.props.userinfo} />
+      <div className="navbar navbar-default">
+        <div className="container-fluid">
+          <div className="navbar-header">
+            <a className="navbar-brand" href="/">Kasora Link</a>
           </div>
-        </ul>
+          <ul className="nav navbar-nav navbar-right">
+            <div className="navbar-collapse collapse" data-uib-collapse="!isCollapsed1" aria-expanded="false" aria-hidden="true" style={{ "height": "0px" }}>
+              <User userinfo={this.props.userinfo} />
+            </div>
+          </ul>
+        </div>
       </div>
     );
   }

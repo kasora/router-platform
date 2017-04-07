@@ -17,5 +17,5 @@ module.exports = {
     renewTime: 1,
 
 
-    site: "https://route.kasora.moe",
+    site: "http://192.168.5.133:12450",
 }
