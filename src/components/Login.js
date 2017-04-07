@@ -29,7 +29,7 @@ class Login extends Component {
       browserHistory.push('/');
     }, (err) => {
       this.refs.password.parentNode.classList.add("has-error");
-      this.refs.password.parentNode.parentNode.firstChild.innerHTML = "Email (password error.)";
+      this.refs.password.parentNode.parentNode.firstChild.innerHTML = "Password (password error.)";
     });
   }
 
