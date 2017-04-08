@@ -6,7 +6,10 @@ Router Platform
 [目前可以查看的版本](https://route.kasora.moe/)
 
 ## 简介
-网页跳转平台，使用 `Express` 和 `MongoDB` 。尚未完成。
+ 网页跳转平台。
+* 后台使用 `Express` 和 `MongoDB` 构建。
+* 后台测试使用了 `Mocha` 框架和 `supertest` 包。
+* 前台使用 `React` 和 `Flux` 完成，并用 `Webpack` 进行了打包。
 
 ## API
 |已完成|API|请求方式|接口|必要参数|可选参数|返回值|所需权限|
