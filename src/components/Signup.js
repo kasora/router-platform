@@ -67,9 +67,15 @@ class Signup extends Component {
             <label for="inputPassword" className="col-lg-2 control-label">Password</label>
             <div className="col-lg-10">
               <input ref="password" name="password" type="password" className="form-control" id="inputPassword" placeholder="Password" />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label for="inputPassword" className="col-lg-2 control-label"></label>
+            <div className="col-lg-10">
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" />Remenber me
+                  <input type="checkbox" />Remember me
                 </label>
               </div>
             </div>
