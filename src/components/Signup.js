@@ -20,11 +20,18 @@ class Signup extends Component {
     this.userSignup();
   }
 
+  resetClass = (event) => {
+    let component = event.target;
+    component.parentNode.classList.remove("has-error");
+    component.setAttribute("placeholder", component.parentNode.parentNode.firstChild.innerHTML);
+  }
+
   userSignup() {
     let data = {
       password: md5(this.refs.password.value),
       email: this.refs.email.value,
       name: this.refs.name.value,
+      remember: this.refs.remember.checked,
     }
     if (data.name !== "guest") {
       request.post('/api/user', data).then((res) => {
@@ -33,13 +40,13 @@ class Signup extends Component {
       }, (err) => {
         this.refs.email.value = "";
         this.refs.email.parentNode.classList.add("has-error");
-        this.refs.email.parentNode.parentNode.firstChild.innerHTML = "Email (Email is exist, sorry.)";
+        this.refs.email.setAttribute("placeholder", "Email is exist, sorry.");
       });
     }
     else {
       this.refs.name.value = "";
       this.refs.name.parentNode.classList.add("has-error");
-      this.refs.name.parentNode.parentNode.firstChild.innerHTML = "Name (select another name, please.)";
+      this.refs.name.setAttribute("placeholder", "select another name, please.");
     }
   }
 
@@ -52,21 +59,21 @@ class Signup extends Component {
           <div className="form-group">
             <label for="inputPassword" className="col-lg-2 control-label">Name</label>
             <div className="col-lg-10">
-              <input ref="name" name="name" type="text" className="form-control" id="inputEmail" placeholder="Name" />
+              <input ref="name" name="name" type="text" className="form-control" onChange={this.resetClass} id="inputEmail" placeholder="Name" />
             </div>
           </div>
 
           <div className="form-group">
             <label for="inputPassword" className="col-lg-2 control-label">Email</label>
             <div className="col-lg-10">
-              <input ref="email" name="email" type="email" className="form-control" id="inputEmail" placeholder="Email" />
+              <input ref="email" name="email" type="email" className="form-control" onChange={this.resetClass} id="inputEmail" placeholder="Email" />
             </div>
           </div>
 
           <div className="form-group">
             <label for="inputPassword" className="col-lg-2 control-label">Password</label>
             <div className="col-lg-10">
-              <input ref="password" name="password" type="password" className="form-control" id="inputPassword" placeholder="Password" />
+              <input ref="password" name="password" type="password" className="form-control" onChange={this.resetClass} id="inputPassword" placeholder="Password" />
             </div>
           </div>
 
@@ -75,7 +82,7 @@ class Signup extends Component {
             <div className="col-lg-10">
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" />Remember me
+                  <input ref="remember" type="checkbox" />Remember me
                 </label>
               </div>
             </div>

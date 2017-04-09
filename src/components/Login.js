@@ -19,17 +19,25 @@ class Login extends Component {
     this.userLogin();
   }
 
+  resetClass = (event) => {
+    let component = event.target;
+    component.parentNode.classList.remove("has-error");
+    component.setAttribute("placeholder", component.parentNode.parentNode.firstChild.innerHTML);
+  }
+
   userLogin() {
     let data = {
       password: md5(this.refs.password.value),
       email: this.refs.email.value,
+      remember: this.refs.remember.checked,
     }
     request.get(`/api/login?email=${data.email}&password=${data.password}`).then((res) => {
       UserActions.login(res);
       browserHistory.push('/');
     }, (err) => {
       this.refs.password.parentNode.classList.add("has-error");
-      this.refs.password.parentNode.parentNode.firstChild.innerHTML = "Password (password error.)";
+      this.refs.password.value = "";
+      this.refs.password.setAttribute("placeholder", "password error.");
     });
   }
 
@@ -42,14 +50,14 @@ class Login extends Component {
           <div className="form-group">
             <label for="inputPassword" className="col-lg-2 control-label">Email</label>
             <div className="col-lg-10">
-              <input ref="email" name="email" type="email" className="form-control" id="inputEmail" placeholder="Email" />
+              <input ref="email" name="email" type="email" className="form-control" id="inputEmail" onChange={this.resetClass} placeholder="Email" />
             </div>
           </div>
 
           <div className="form-group">
             <label for="inputPassword" className="col-lg-2 control-label">Password</label>
             <div className="col-lg-10">
-              <input ref="password" name="password" type="password" className="form-control" id="inputPassword" placeholder="Password" />
+              <input ref="password" name="password" type="password" className="form-control" id="inputPassword" onChange={this.resetClass} placeholder="Password" />
             </div>
           </div>
 
@@ -58,7 +66,7 @@ class Login extends Component {
             <div className="col-lg-10">
               <div className="checkbox">
                 <label>
-                  <input type="checkbox" />Remember me
+                  <input ref="remember" type="checkbox" />Remember me
                 </label>
               </div>
             </div>
