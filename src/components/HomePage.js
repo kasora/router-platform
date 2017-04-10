@@ -1,5 +1,6 @@
 'use strict';
 
+const React = require('react');
 const { Component } = require('react');
 const { render } = require('react-dom');
 
