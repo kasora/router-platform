@@ -200,8 +200,6 @@ describe('check user part.', () => {
             .get('/api/user')
             .set("Content-Type", "application/x-www-form-urlencoded")
             .expect(200);
-        console.log(userinfo);
-        console.log(guestInfo);
 
         await remove(guestInfo);
     });
