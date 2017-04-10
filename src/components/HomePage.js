@@ -1,7 +1,7 @@
 'use strict';
 
-import React, { Component } from 'react';
-import { render } from 'react-dom';
+const { Component } = require('react');
+const { render } = require('react-dom');
 
 const UserActions = require('../actions/UserActions');
 const ListStore = require('../stores/ListStore');

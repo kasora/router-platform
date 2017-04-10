@@ -1,8 +1,8 @@
-'use strict'
+'use strict';
 
-var Dispatcher = require('flux').Dispatcher;
-var AppDispatcher = new Dispatcher();
-var ListStore = require('../stores/ListStore');
+const Dispatcher = require('flux').Dispatcher;
+const AppDispatcher = new Dispatcher();
+const ListStore = require('../stores/ListStore');
 
 AppDispatcher.register(function (action) {
   switch (action.actionType) {

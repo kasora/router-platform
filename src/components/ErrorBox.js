@@ -1,8 +1,9 @@
 'use strict';
 
-import React, { Component } from 'react';
-import { render } from 'react-dom';
-import { browserHistory, Router, Route, IndexRoute, Link } from 'react-router';
+const { Component } = require('react');
+const { render } = require('react-dom');
+const { browserHistory, Router, Route, IndexRoute, Link } = require('react-router');
+
 const md5 = require('md5');
 const request = require('../utils/http');
 

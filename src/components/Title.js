@@ -1,12 +1,12 @@
-'use strict'
+'use strict';
 
-const React = require('react');
 const { Component } = require('react');
-import { render } from 'react-dom';
-import { Router, Route, Link, browserHistory, IndexRoute, IndexRedirect } from 'react-router';
-require('classlist-polyfill');
+const { render } = require('react-dom');
+const { browserHistory, Router, Route, IndexRoute, Link } = require('react-router');
+
 const User = require('./User');
 const ListStore = require('../stores/ListStore');
+require('classlist-polyfill');
 
 class Title extends Component {
   constructor(props) {

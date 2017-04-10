@@ -1,9 +1,8 @@
-'use strict'
+'use strict';
 
-const React = require('react');
 const { Component } = require('react');
-import { render } from 'react-dom';
-const { Router, Route, Link, browserHistory, IndexRoute } = require('react-router');
+const { render } = require('react-dom');
+const { browserHistory, Router, Route, IndexRoute, Link } = require('react-router');
 const ListStore = require('../stores/ListStore');
 const UserActions = require('../actions/UserActions');
 const request = require('../utils/http');

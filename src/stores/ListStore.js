@@ -1,7 +1,7 @@
 'use strict'
 
-var EventEmitter = require('events').EventEmitter;
-var assign = require('object-assign');
+const EventEmitter = require('events').EventEmitter;
+const assign = require('object-assign');
 
 var ListStore = assign({}, EventEmitter.prototype, {
   userinfo: {

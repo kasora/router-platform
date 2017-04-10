@@ -1,11 +1,12 @@
 'use strict';
 
-import React, { Component } from 'react';
-import { render } from 'react-dom';
-import request from '../utils/http';
-import { browserHistory, Router, Route, IndexRoute, Link } from 'react-router';
-require('classlist-polyfill');
+const { Component } = require('react');
+const { render } = require('react-dom');
+const { browserHistory, Router, Route, IndexRoute, Link } = require('react-router');
+const request = require('../utils/http');
 const config = require('../../config');
+
+require('classlist-polyfill');
 
 class Links extends Component {
   constructor() {

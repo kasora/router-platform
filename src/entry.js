@@ -1,8 +1,10 @@
-import React from 'react';
-import { render } from 'react-dom';
-import { Router, Route, Link, browserHistory, IndexRoute, IndexRedirect } from 'react-router';
+'use strict';
 
-import HomePageController from './controller/HomePageController';
+const { Component } = require('react');
+const { render } = require('react-dom');
+const { browserHistory, Router, Route, IndexRoute, Link } = require('react-router');
+
+const HomePageController = require('./controller/HomePageController');
 const PassportController = require('./controller/PassportController');
 const Title = require('./components/Title');
 
