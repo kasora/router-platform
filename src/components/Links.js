@@ -32,12 +32,13 @@ class Links extends Component {
   deleteHandle = (event) => {
     let row = event.target.parentNode.parentNode;
     let offset = row.getAttribute("offset");
-    let linkid = this.state.links[offset].linkid;
-    let link = row.firstChild.firstChild.value;
     row.classList.remove("info");
     row.classList.add("warning");
     row.childNodes[3].innerHTML = "pending";
-    request.delete(`/api/link?linkid=${linkid}`).then((res) => {
+    let data = {
+      linkid: this.state.links[offset].linkid,
+    }
+    request.delete(`/api/link`, data).then((res) => {
       row.classList.remove("warning");
       row.childNodes[3].innerHTML = "";
       this.renewLinks();
@@ -53,10 +54,14 @@ class Links extends Component {
     let offset = row.getAttribute("offset");
     let linkid = this.state.links[offset].linkid;
     let link = row.firstChild.firstChild.value;
+    let data = {
+      linkid: this.state.links[offset].linkid,
+      newlink: row.firstChild.firstChild.value,
+    }
     row.classList.remove("info");
     row.classList.add("warning");
     row.childNodes[3].innerHTML = "pending";
-    request.put(`/api/link?linkid=${linkid}&newlink=${link}`).then((res) => {
+    request.put(`/api/link`, data).then((res) => {
       row.classList.remove("warning");
       row.classList.add("success");
       row.childNodes[3].innerHTML = "success";
@@ -69,8 +74,10 @@ class Links extends Component {
 
   newLinkHandle = (event) => {
     let row = event.target.parentNode.parentNode;
-    let link = row.firstChild.firstChild.value;
-    request.post(`/api/link?link=${link}`).then(
+    let data = {
+      link: row.firstChild.firstChild.value,
+    }
+    request.post(`/api/link`, data).then(
       this.renewLinks()
     );
     row.firstChild.firstChild.value = "";
@@ -110,7 +117,7 @@ class Links extends Component {
                         <input offset={offset} className="form-control" value={link.link} onChange={this.onLinkChange} />
                       </td>
                       <td>
-                        <a href={`${config.site}/api/route?linkid=${link.linkid}`}>
+                        <a href={`/api/route?linkid=${link.linkid}`}>
                           {`${config.site}/api/route?linkid=${link.linkid}`}
                         </a>
                       </td>

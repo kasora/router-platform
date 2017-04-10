@@ -8,8 +8,6 @@ function common(method, url, data, options) {
     return new Promise((resolve, reject) => {
         let xhr = new XMLHttpRequest();
         options = options || {};
-        xhr.open(method, url);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
         if (data && typeof data === 'object') {
             let pairs = [];
@@ -29,6 +27,14 @@ function common(method, url, data, options) {
         if (options.before) {
             options.before(xhr);
         }
+        if (data) {
+            xhr.open(method, url + "?" + data);
+        }
+        else {
+            xhr.open(method, url);
+        }
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.send(data);
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === xhr.DONE) {
@@ -51,14 +57,13 @@ function common(method, url, data, options) {
                 }
             }
         };
-        xhr.send(data);
     });
 }
 
 let request = {};
 
-request.get = function (url, options) {
-    return common('GET', url, undefined, options);
+request.get = function (url, data, options) {
+    return common('GET', url, data, options);
 }
 
 request.post = function (url, data, options) {
@@ -69,12 +74,12 @@ request.put = function (url, data, options) {
     return common('PUT', url, data, options);
 }
 
-request.delete = function (url, options) {
-    return common('DELETE', url, undefined, options);
+request.delete = function (url, data, options) {
+    return common('DELETE', url, data, options);
 }
 
-request.head = function (url, options) {
-    return common('HEAD', url, undefined, options);
+request.head = function (url, data, options) {
+    return common('HEAD', url, data, options);
 }
 
 module.exports = request;

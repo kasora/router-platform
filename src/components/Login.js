@@ -29,9 +29,9 @@ class Login extends Component {
     let data = {
       password: md5(this.refs.password.value),
       email: this.refs.email.value,
-      remember: this.refs.remember.checked,
+      remember: this.refs.remember.checked ? "true" : "false",
     }
-    request.get(`/api/login?email=${data.email}&password=${data.password}`).then((res) => {
+    request.get(`/api/login`, data).then((res) => {
       UserActions.login(res);
       browserHistory.push('/');
     }, (err) => {

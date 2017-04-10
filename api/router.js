@@ -298,7 +298,12 @@ let login = (req, res) => {
     database.getUserByEmail(userInfo.email).then((userResult) => {
         database.removeToken(userResult._id).then(() => {
             database.insertToken(userResult._id).then((newToken) => {
-                res.cookie("token", newToken.token, { maxAge: config.renewTime * 86400000 });
+                if (req.query.remember === "true") {
+                    res.cookie("token", newToken.token, { maxAge: config.renewTime * 86400000 });
+                }
+                else {
+                    res.cookie("token", newToken.token);
+                }
                 userResult.token = newToken.token;
                 userResult.tokenDispose = newToken.dispose;
                 res.type('application/json');
@@ -329,7 +334,12 @@ let addUser = (req, res) => {
 
     database.insertUser(userInfo).then((result) => {
         database.insertToken(result._id).then((tokenInfo) => {
-            res.cookie("token", tokenInfo.token, { maxAge: config.renewTime * 86400000 });
+            if (req.query.remember === "true") {
+                res.cookie("token", newToken.token, { maxAge: config.renewTime * 86400000 });
+            }
+            else {
+                res.cookie("token", newToken.token);
+            }
             result.purview = "user";
             res.type('application/json');
             res.status(201).send(result);
