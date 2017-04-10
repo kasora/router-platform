@@ -335,10 +335,10 @@ let addUser = (req, res) => {
     database.insertUser(userInfo).then((result) => {
         database.insertToken(result._id).then((tokenInfo) => {
             if (req.query.remember === "true") {
-                res.cookie("token", newToken.token, { maxAge: config.renewTime * 86400000 });
+                res.cookie("token", tokenInfo.token, { maxAge: config.renewTime * 86400000 });
             }
             else {
-                res.cookie("token", newToken.token);
+                res.cookie("token", tokenInfo.token);
             }
             result.purview = "user";
             res.type('application/json');
