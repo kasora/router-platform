@@ -13,14 +13,18 @@ const ListStore = require('../stores/ListStore');
 class Login extends Component {
   constructor() {
     super();
+
+    this.submitHandle = this.submitHandle.bind(this);
+    this.resetClass = this.resetClass.bind(this);
+    this.userLogin = this.userLogin.bind(this);
   }
 
-  submitHandle = (event) => {
+  submitHandle(event) {
     event.preventDefault();
     this.userLogin();
   }
 
-  resetClass = (event) => {
+  resetClass(event) {
     let component = event.target;
     component.parentNode.classList.remove("has-error");
     component.setAttribute("placeholder", component.parentNode.parentNode.firstChild.innerHTML);

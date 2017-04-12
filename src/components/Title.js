@@ -20,12 +20,8 @@ class Title extends Component {
         <div className="container-fluid">
           <div className="navbar-header">
             <a className="navbar-brand" href="/">Kasora Link</a>
+            <User userinfo={this.props.userinfo} />
           </div>
-          <ul className="nav navbar-nav navbar-right">
-            <div className="navbar-collapse collapse" data-uib-collapse="!isCollapsed1" aria-expanded="false" aria-hidden="true" style={{ "height": "0px" }}>
-              <User userinfo={this.props.userinfo} />
-            </div>
-          </ul>
         </div>
       </div>
     );

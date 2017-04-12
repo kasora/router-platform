@@ -14,14 +14,19 @@ require('classlist-polyfill');
 class Signup extends Component {
   constructor(props) {
     super(props);
+
+    this.submitHandle = this.submitHandle.bind(this);
+    this.resetClass = this.resetClass.bind(this);
+    this.userSignup = this.userSignup.bind(this);
+
   }
 
-  submitHandle = (event) => {
+  submitHandle(event) {
     event.preventDefault();
     this.userSignup();
   }
 
-  resetClass = (event) => {
+  resetClass(event) {
     let component = event.target;
     component.parentNode.classList.remove("has-error");
     component.setAttribute("placeholder", component.parentNode.parentNode.firstChild.innerHTML);

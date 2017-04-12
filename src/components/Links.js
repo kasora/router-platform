@@ -16,10 +16,16 @@ class Links extends Component {
     this.state = {
     };
 
+    this.renewLinks = this.renewLinks.bind(this);
+    this.deleteHandle = this.deleteHandle.bind(this);
+    this.updateHandle = this.updateHandle.bind(this);
+    this.newLinkHandle = this.newLinkHandle.bind(this);
+    this.onLinkChange = this.onLinkChange.bind(this);
+
     this.renewLinks();
   }
 
-  renewLinks = () => {
+  renewLinks() {
     request.get('/api/link').then((allLink) => {
       this.setState({
         links: allLink.sort(),
@@ -31,7 +37,7 @@ class Links extends Component {
     });
   }
 
-  deleteHandle = (event) => {
+  deleteHandle(event) {
     let row = event.target.parentNode.parentNode;
     let offset = row.getAttribute("offset");
     row.classList.remove("info");
@@ -51,7 +57,7 @@ class Links extends Component {
     });
   }
 
-  updateHandle = (event) => {
+  updateHandle(event) {
     let row = event.target.parentNode.parentNode;
     let offset = row.getAttribute("offset");
     let linkid = this.state.links[offset].linkid;
@@ -74,7 +80,7 @@ class Links extends Component {
     });
   }
 
-  newLinkHandle = (event) => {
+  newLinkHandle(event) {
     let row = event.target.parentNode.parentNode;
     let data = {
       link: row.firstChild.firstChild.value,
@@ -85,7 +91,7 @@ class Links extends Component {
     row.firstChild.firstChild.value = "";
   }
 
-  onLinkChange = (event) => {
+  onLinkChange(event) {
     let offset = event.target.getAttribute("offset");
     this.state.links[offset].link = event.target.value;
 

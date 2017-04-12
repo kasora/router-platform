@@ -16,9 +16,12 @@ class User extends Component {
     this.state = {
       open: false
     }
+
+    this.clickHandle = this.clickHandle.bind(this);
+    this.signout = this.signout.bind(this);
   }
 
-  clickHandle = (event) => {
+  clickHandle(event) {
 
     event.preventDefault();
     let div = event.target.parentNode;
@@ -32,7 +35,7 @@ class User extends Component {
     }
   }
 
-  signout = (event) => {
+  signout(event) {
     request.delete('/api/login').then(() => {
       UserActions.signout({
         name: "guest",
