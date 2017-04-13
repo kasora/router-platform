@@ -46,7 +46,7 @@ class User extends Component {
   render() {
     if (this.props.userinfo.name === "guest") {
       return (
-        <div data-uib-dropdown="" style={{ display: "inline-block" }} className="dropdown">
+        <div id="user" data-uib-dropdown="" style={{ display: "inline-block" }} className="dropdown">
           <ul className="nav navbar-nav">
             <li className="dropdown">
               <a onClick={this.clickHandle} href="" data-uib-dropdown-toggle="" class="dropdown-toggle" aria-haspopup="true" aria-expanded={this.state.open}>
@@ -64,7 +64,7 @@ class User extends Component {
     }
     else {
       return (
-        <div data-uib-dropdown="" style={{ display: "inline-block" }} className="dropdown">
+        <div id="user" data-uib-dropdown="" style={{ display: "inline-block" }} className="dropdown">
           <ul className="nav navbar-nav">
             <li className="dropdown">
               <a onClick={this.clickHandle} href="" data-uib-dropdown-toggle="" class="dropdown-toggle" aria-haspopup="true" aria-expanded={this.state.open}>

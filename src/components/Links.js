@@ -122,7 +122,7 @@ class Links extends Component {
                   return (
                     <tr offset={offset}>
                       <td>
-                        <input offset={offset} className="form-control" value={link.link} onChange={this.onLinkChange} />
+                        <input id="linkurl" offset={offset} className="form-control" value={link.link} onChange={this.onLinkChange} />
                       </td>
                       <td>
                         <a href={`/api/route?linkid=${link.linkid}`}>
@@ -143,7 +143,7 @@ class Links extends Component {
                 })
               }
               <tr className="info">
-                <td><input className="form-control" /></td>
+                <td><input id="linkurl" className="form-control" /></td>
                 <td></td>
                 <td></td>
                 <td></td>

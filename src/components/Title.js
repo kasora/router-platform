@@ -18,7 +18,7 @@ class Title extends Component {
     return (
       <div className="navbar navbar-default">
         <div className="container-fluid">
-          <div className="navbar-header">
+          <div id="title" className="navbar-header">
             <a className="navbar-brand" href="/">Kasora Link</a>
             <User userinfo={this.props.userinfo} />
           </div>
