@@ -12,6 +12,7 @@ const PassportController = require('./PassportController');
 const HomePage = require('../components/HomePage');
 const ErrorBox = require('../components/ErrorBox');
 const Title = require('../components/Title');
+const Introduction = require('../components/Introduction');
 
 class HomePageController extends Component {
   constructor(props) {
@@ -55,6 +56,7 @@ class HomePageController extends Component {
           <Title userinfo={this.state.userinfo} />
           <Router history={browserHistory}>
             <Route path='/passport/:action' component={PassportController} />
+            <Route path='/' component={Introduction} />
           </Router>
         </div>
       );
