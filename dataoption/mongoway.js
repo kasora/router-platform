@@ -292,6 +292,7 @@ let updateUserByEmail = (email, userInfo) => {
                 $set: {
                     name: userInfo.name,
                     password: userInfo.password,
+                    checked: userInfo.checked,
                 }
             }, function (err, result) {
                 if (err) {
@@ -321,6 +322,8 @@ let getUserById = (_id) => {
                         email: result.email,
                         name: result.name,
                         purview: result.purview,
+                        checked: result.checked,
+                        emailToken: result.emailToken,
                     });
                 }
                 db.close();
@@ -344,6 +347,8 @@ let getUserByEmail = (email) => {
                         email: result.email,
                         name: result.name,
                         purview: result.purview,
+                        checked: result.checked,
+                        emailToken: result.emailToken,
                     });
                 }
                 db.close();

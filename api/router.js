@@ -6,6 +6,7 @@ const ObjectID = require('mongodb').ObjectID;
 const config = require('../config');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
+const randomstring = require('randomstring');
 
 let router = express.Router();
 
@@ -68,7 +69,7 @@ let updateToken = (req, res, next) => {
 }
 let checkEmail = (req, res, next) => {
     database.getUserByEmail(req.query.email).then((result) => {
-        if (result) {
+        if (result && (!result.checked || result.checked === "true")) {
             res.status(400).send({ err: 'email error.' });
         }
     }, (err) => {
@@ -296,6 +297,10 @@ let login = (req, res) => {
     }
 
     database.getUserByEmail(userInfo.email).then((userResult) => {
+        if (userResult.checked === "false") {
+            res.status(401).send({ err: "email error." });
+            return;
+        }
         database.removeToken(userResult._id).then(() => {
             database.insertToken(userResult._id).then((newToken) => {
                 if (req.query.remember === "true") {
@@ -330,6 +335,8 @@ let addUser = (req, res) => {
         email: req.query.email,
         password: req.query.password,
         purview: "user",
+        checked: "false",
+        emailToken: randomstring.generate(),
     }
 
     database.insertUser(userInfo).then((result) => {
@@ -460,6 +467,15 @@ let updateUser = (req, res) => {
                 res.status(500).send({ err: "database error." });
             }
         });
+    });
+}
+let bindEmail = (req, res) => {
+    database.getUserByEmail(req.query.email).then((result) => {
+        if (result.emailToken === req.query.emailToken) {
+            database.updateUserByEmail(req.query.email, { checked: "true" }).then(() => {
+                res.status(201).send({});
+            });
+        }
     });
 }
 
