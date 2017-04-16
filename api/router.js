@@ -43,8 +43,7 @@ let updateToken = (req, res, next) => {
             let now = new Date();
             if ((now.getTime() > tokenResult.dispose) ||
                 (now.getTime() - tokenResult.create > config.disposeTime * 24 * 60 * 60 * 1000)) {
-                res.status(401).send({ err: "token error." });
-                return;
+                next();
             }
             else {
                 database.renewTokenByToken(req.cookies.token).then((result) => {
@@ -52,50 +51,34 @@ let updateToken = (req, res, next) => {
                 }, (err) => {
                     res.status(500).send({ err: "database error." })
                 });
-                return;
             }
         }, (err) => {
-            if (err === "token error.") {
-                res.status(401).send({ err });
-            }
-            else {
-                res.status(500).send({ err: "database error." });
-            }
+            next();
         });
     }
     else {
         next();
     }
 }
-let checkEmail = (req, res, next) => {
-    database.getUserByEmail(req.query.email).then((result) => {
-        if (result && (!result.checked || result.checked === "true")) {
-            res.status(400).send({ err: 'email error.' });
-        }
-    }, (err) => {
-        if (err === "userinfo error.") {
-            next();
-        }
-        else {
-            res.status(500).send({ err: "database error." });
-        }
-    });
-}
-let checkToken = (req, res, next) => {
+let getUid = (req, res, next) => {
     if (!req.cookies.token) {
-        res.status(401).send({ err: "token error." });
-        return;
-    }
-    database.getTokenByToken(req.cookies.token).then((tokenResult) => {
-        if (!tokenResult) {
-            res.status(401).send({ err: "token error." });
-        }
-        req.query._uid = tokenResult._uid;
+        req.query._uid = undefined;
         next();
-    }, (err) => {
-        res.status(500).send({ err: "database error." });
-        return;
-    });
+    }
+    else {
+        database.getTokenByToken(req.cookies.token).then((tokenResult) => {
+            req.query._uid = tokenResult._uid;
+            next();
+        }, (err) => {
+            if (err === "token error.") {
+                req.query._uid = undefined;
+                next();
+            }
+            else {
+                res.status(500).send({ err: "database error." });
+            }
+        });
+    }
 }
 let checkAdmin = (req, res, next) => {
     if (req.cookies.token === undefined) {
@@ -117,395 +100,53 @@ let checkAdmin = (req, res, next) => {
         }
     });
 }
-let checkPassword = (req, res, next) => {
-    database.getPasswordByEmail(req.query.email).then((password) => {
-        if (req.query.password === password) {
-            next();
-        }
-        else {
-            res.status(401).send({ err: "password error." });
-        }
-    }, (err) => {
-        if (err === "userinfo error.") {
-            res.status(401).send({ err });
-        }
-        else {
-            res.status(500).send({ err: "database error." });
-        }
-    });
-}
-let checkUserInfo = (req, res, next) => {
-    if (!req.query.email || !req.query.password) {
-        res.status(400).send({
-            err: "userinfo error."
-        });
-        return;
-    }
-    next();
-}
 let checkUserPurview = (req, res, next) => {
     if (req.cookies.token === undefined) {
-        res.status(401).send({ err: "purview error." });
-        return;
+        req.query.purview = "guest";
+        next();
     }
-    database.getTokenByToken(req.cookies.token).then((tokenResult) => {
-        database.getUserById(tokenResult._uid).then((result) => {
-            if (result.email === req.query.email) {
-                req.query.purview = "owner";
-                next();
-            }
-            else if (result.purview === "admin") {
-                req.query.purview = "admin";
-                next();
-            }
-            else {
-                res.status(401).send({ err: "token error." });
-            }
-        }, (err) => {
-            if (err === "user error.") {
-                res.status(401).send({ err: "token error." });
-            }
-            else {
-                res.status(500).send({ err: "database error." });
-            }
-        });
-    }, (err) => {
-        if (err === "token error.") {
-            res.status(401).send({ err });
-        }
-        else {
-            res.status(500).send({ err: "database error." })
-        }
-    });
-}
-let checkLinkPurview = (req, res, next) => {
-    if (req.cookies.token === undefined) {
-        res.status(401).send({ err: "purview error." });
-        return;
-    }
-    database.getTokenByToken(req.cookies.token).then((tokenResult) => {
-        database.getUserById(tokenResult._uid).then((result) => {
-            if (result.purview === "admin") {
-                req.query.purview = "admin";
-                next();
-                return;
-            }
-            database.getLinkById(req.query._linkid).then((linkResult) => {
-                if (linkResult._uid.toString() === tokenResult._uid.toString()) {
+    else {
+        database.getTokenByToken(req.cookies.token).then((tokenResult) => {
+            database.getUserById(tokenResult._uid).then((result) => {
+                if (result.email === req.query.email) {
                     req.query.purview = "owner";
                     next();
-                    return;
+                }
+                else if (result.purview === "admin") {
+                    req.query.purview = "admin";
+                    next();
                 }
                 else {
-                    res.status(401).send({ err: "token error." });
+                    req.query.purview = "guest";
+                    next();
                 }
             }, (err) => {
                 if (err === "user error.") {
-                    res.status(401).send({ err: "token error." });
+                    req.query.purview = "guest";
+                    next();
                 }
                 else {
                     res.status(500).send({ err: "database error." });
                 }
             });
         }, (err) => {
-            if (err === "user error.") {
-                res.status(401).send({ err: "token error." });
+            if (err === "token error.") {
+                req.query.purview = "guest";
+                next();
             }
             else {
-                res.status(500).send({ err: "database error." });
-            }
-        });
-    }, (err) => {
-        if (err === "token error.") {
-            res.status(401).send({ err });
-        }
-        else {
-            res.status(500).send({ err: "database error." })
-        }
-    });
-}
-
-
-
-let insertLink = (req, res) => {
-    if (!req.query.link) {
-        return res.status(400).send({
-            err: "link error.",
-        });
-    }
-    database.insertLink(req.query.link, req.query._uid).then((result) => {
-        res.status(201).send({
-            uid: req.query._uid,
-            linkid: result._id,
-            link: req.query.link,
-            count: 0,
-        });
-    }, (err) => {
-        res.sendStatus(500);
-    });
-}
-let removeLink = (req, res) => {
-    database.removeLinkById(req.query._linkid).then((result) => {
-        res.status(204).send({});
-    }, (err) => {
-        res.status(500).send({ err: "database error." });
-    });
-}
-let updateLink = (req, res) => {
-    database.getLinkById(req.query._linkid).then((linkResult) => {
-        database.updateLinkById(req.query._linkid, req.query.newlink).then((result) => {
-            res.status(201).send(linkResult);
-        });
-    }, (err) => {
-        res.status(500).send({ err: "database error." });
-    });
-}
-let getLink = (req, res) => {
-    req.query.page = parseInt(req.query.page) || 0;
-    req.query.per_page = parseInt(req.query.per_page) || 20;
-    req.query.per_page = req.query.per_page > 100 ? 100 : req.query.per_page;
-    database.getLinksByUid(req.query._uid, req.query.page, req.query.per_page).then((result) => {
-        if (!result) {
-            res.status(404).send({
-                err: "id error.",
-            });
-        }
-        else {
-            let links = [];
-            for (let element of result) {
-                links.push({
-                    uid: element._uid,
-                    link: element.link,
-                    linkid: element._id,
-                    count: element.count,
-                });
-            }
-            res.status(200).send(links);
-        }
-    }, (err) => {
-        res.status(500).send({ err: "database error." });
-    });
-}
-
-
-
-
-let login = (req, res) => {
-    let userInfo = {
-        email: req.query.email,
-        password: req.query.password,
-    }
-
-    database.getUserByEmail(userInfo.email).then((userResult) => {
-        if (userResult.checked === "false") {
-            res.status(401).send({ err: "email error." });
-            return;
-        }
-        database.removeToken(userResult._id).then(() => {
-            database.insertToken(userResult._id).then((newToken) => {
-                if (req.query.remember === "true") {
-                    res.cookie("token", newToken.token, { maxAge: config.renewTime * 86400000 });
-                }
-                else {
-                    res.cookie("token", newToken.token);
-                }
-                userResult.token = newToken.token;
-                userResult.tokenDispose = newToken.dispose;
-                res.type('application/json');
-                res.status(201).send(userResult);
-            });
-        });
-    }, (err) => {
-        if (err === "userinfo error.") {
-            res.status(401).send({ err });
-        }
-        else {
-            res.status(500).send({ err: "database error." });
-        }
-    });
-}
-let logout = (req, res) => {
-    res.clearCookie("token");
-    res.type('application/json');
-    res.status(204).send({});
-}
-let addUser = (req, res) => {
-    let userInfo = {
-        name: req.query.name,
-        email: req.query.email,
-        password: req.query.password,
-        purview: "user",
-        checked: "false",
-        emailToken: randomstring.generate(),
-    }
-
-    database.insertUser(userInfo).then((result) => {
-        database.insertToken(result._id).then((tokenInfo) => {
-            if (req.query.remember === "true") {
-                res.cookie("token", tokenInfo.token, { maxAge: config.renewTime * 86400000 });
-            }
-            else {
-                res.cookie("token", tokenInfo.token);
-            }
-            result.purview = "user";
-            res.type('application/json');
-            res.status(201).send(result);
-        }, (err) => {
-            res.status(500).send({ err: "database error." });
-        });
-    }, (err) => {
-        res.status(500).send({ err: "database error." });
-    });
-}
-let getUser = (req, res) => {
-    if (req.query._uid !== undefined) {
-        database.getUserById(req.query._uid).then((result) => {
-            res.status(200).send({
-                _id: result._id,
-                name: result.name,
-                email: result.email,
-                purview: result.purview,
-            });
-        }, (err) => {
-            if (err === "user error.") {
-                res.status(404).send({ err });
-            }
-            else {
-                res.status(500).send({ err: "database error." });
+                res.status(500).send({ err: "database error." })
             }
         });
     }
-    else if (req.query.email !== undefined) {
-        database.getUserByEmail(req.query.email).then((result) => {
-            res.status(200).send({
-                _id: result._id,
-                name: result.name,
-                email: result.email,
-                purview: result.purview,
-            });
-        }, (err) => {
-            if (err === "userinfo error.") {
-                res.status(404).send({ err });
-            }
-            else {
-                res.status(500).send({ err: "database error." });
-            }
-        });
-    }
-    else if (req.cookies.token != undefined) {
-        database.getTokenByToken(req.cookies.token).then(tokenResult => {
-            database.getUserById(tokenResult._uid).then(result => {
-                res.status(200).send({
-                    _id: result._id,
-                    name: result.name,
-                    email: result.email,
-                    purview: result.purview,
-                });
-            }, (err) => {
-                if (err === "user error.") {
-                    res.status(404).send({ err });
-                }
-                else {
-                    res.status(500).send({ err: "database error." });
-                }
-            });
-        }, (err) => {
-            res.status(400).send({ err: "token error" });
-        });
-    }
-    else {
-        res.status(404).send({ err: "userinfo error." });
-    }
-}
-let removeUser = (req, res) => {
-    if (req.query._uid !== undefined) {
-        database.removeUserById(req.query._uid).then((result) => {
-            if (req.query.purview === "owner") {
-                res.clearCookie("token");
-            }
-            res.status(204).send({});
-        }, (err) => {
-            res.status(500).send({ err: "database error." });
-        });
-    }
-    else if (req.query.email !== undefined) {
-        database.removeUserByEmail(req.query.email).then((result) => {
-            if (req.query.purview === "owner") {
-                res.clearCookie("token");
-            }
-            res.status(204).send({});
-        }, (err) => {
-            res.status(500).send({ err: "database error." });
-        });
-    }
-    else {
-        res.status(404).send({ err: "userinfo error." });
-    }
-}
-let updateUser = (req, res) => {
-    let userInfo = {
-        name: req.query.name,
-        password: req.query.password,
-    }
-    database.updateUserByEmail(req.query.email, userInfo).then((result) => {
-        database.getUserByEmail(req.query.email).then((userResult) => {
-            database.getTokenByUid(userResult._id).then((tokenResult) => {
-                res.status(201).send({
-                    _id: userResult._id,
-                    email: req.query.email,
-                    name: userInfo.name,
-                    purview: userResult.purview,
-                    token: tokenResult.token,
-                    tokenDispose: tokenResult.dispose,
-                });
-            });
-        }, (err) => {
-            if (err === "userinfo error.") {
-                res.status(401).send({ err });
-            }
-            else {
-                res.status(500).send({ err: "database error." });
-            }
-        });
-    });
-}
-let bindEmail = (req, res) => {
-    database.getUserByEmail(req.query.email).then((result) => {
-        if (result.emailToken === req.query.emailToken) {
-            database.updateUserByEmail(req.query.email, { checked: "true" }).then(() => {
-                res.status(201).send({});
-            });
-        }
-    });
 }
 
 
 
 
-let routeLink = (req, res) => {
-    database.getLinkById(req.query._linkid).then((result) => {
-        if (!result) {
-            res.status(404).send({ err: "id error." });
-            return;
-        }
-        else {
-            res.type('html')
-            res.send(`<script>window.location.href='${result.link}';</script>`);
-            database.addCountById(req.query._linkid);
-        }
-    }, (err) => {
-        res.status(500).send({ err: "database error." });
-        return;
-    });
-
-}
-
-
-
-
-// organize params
+// compatible post body
 router.use(['/link', '/route'], (req, res, next) => {
-    req.query.link = req.query.link || req.body.link;
+    req.query.link = req.query.link || req.body.link || req.query.newlink || req.body.newlink;
     req.query.uid = req.query.uid || req.body.uid;
     req.query.linkid = req.query.linkid || req.body.linkid;
     req.query.page = req.query.page || req.body.page;
@@ -525,45 +166,13 @@ router.use(['/user', '/login'], (req, res, next) => {
 });
 
 router.use(replaceMongoId);
-router.use(['/link', '/route'], updateToken);
-router.get('/user', updateToken);
-router.put('/user', updateToken);
-router.delete('/user', updateToken);
+router.use(updateToken);
+router.use(checkUserPurview);
+router.use(getUid);
 
-router.post('/user', checkUserInfo);
-router.post('/user', (req, res, next) => {
-    if (!req.query.name) {
-        req.query.name = 'unknown';
-    }
-    next();
-});
-router.post('/user', checkEmail);
-router.delete('/user', checkUserPurview);
-router.put('/user', checkUserPurview);
-
-router.get('login', checkUserInfo)
-router.get('/login', checkPassword);
-
-router.use('/link', checkToken);
-router.put('/link', checkLinkPurview);
-router.delete('/link', checkLinkPurview);
-
-
-router.post('/link', insertLink);
-router.delete('/link', removeLink);
-router.put('/link', updateLink);
-router.get('/link', getLink);
-
-router.post('/user', addUser);
-router.delete('/user', removeUser);
-router.put('/user', updateUser);
-router.get('/user', getUser);
-
-router.get('/login', login);
-router.delete('/login', logout);
-
-router.get('/route', routeLink);
-
+router.use(require('./user'));
+router.use(require('./link'));
+router.use(require('./login'));
+router.use(require('./routeLink'));
 
 module.exports = router;
-

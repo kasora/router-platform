@@ -7,6 +7,23 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Mocha Tests",
+            "program": "${workspaceRoot}/node_modules/.3.2.0@mocha/bin/_mocha",
+            "args": [
+                "--recursive",
+                "--compilers js:babel-core/register",
+                "-u",
+                "tdd",
+                "--timeout",
+                "999999",
+                "--colors",
+                "${workspaceRoot}/test"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "启动程序",
             "program": "${workspaceRoot}/server.js"
         },
