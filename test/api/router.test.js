@@ -6,6 +6,7 @@ const randomstring = require('randomstring');
 const config = require('../../config');
 const mongoway = require('../../dataoption/mongoway');
 const request = require('supertest');
+const forTest = require('../../api/forTest');
 
 let app = require('../../server');
 
@@ -31,13 +32,14 @@ fakeadmin.email = "fake@kasora.moe";
 
 let agent = request.agent(app);
 
-function signup(userInfo) {
-    let params = `email=${userInfo.email}&password=${userInfo.passwordMD5}`;
-    if (userInfo.name) params += `&name=${userInfo.name}`;
-    return agent
-        .post('/api/user' + '?' + params)
-        .set("Content-Type", "application/x-www-form-urlencoded")
-        .expect(201);
+function signup(_userInfo) {
+    let userInfo = {
+        name: _userInfo.name || 'unknown',
+        email: _userInfo.email,
+        password: _userInfo.passwordMD5,
+    }
+    forTest.addUser(userInfo);
+    login(userInfo);
 }
 function login(userInfo) {
     let params = `email=${userInfo.email}&password=${userInfo.passwordMD5}`;
@@ -195,7 +197,7 @@ describe('check user part.', () => {
 
     it('get self info by token', async function () {
         await signup(guestInfo);
-        
+
         let userinfo = await agent
             .get('/api/user')
             .set("Content-Type", "application/x-www-form-urlencoded")

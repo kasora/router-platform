@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const express = require('express');
 const database = require('./data').database;
@@ -80,26 +80,6 @@ let getUid = (req, res, next) => {
         });
     }
 }
-let checkAdmin = (req, res, next) => {
-    if (req.cookies.token === undefined) {
-        res.status(401).send({ err: "purview error." });
-        return;
-    }
-    database.getTokenByToken(req.cookies.token).then((result) => {
-        database.getUserById(result._uid).then((result) => {
-            if (result.purview === "admin") {
-                next();
-            }
-            else {
-                res.status(401).send({ err: "purview error." });
-            }
-        });
-    }, (err) => {
-        if (err === "token error.") {
-            res.status(401).send({ err });
-        }
-    });
-}
 let checkUserPurview = (req, res, next) => {
     if (req.cookies.token === undefined) {
         req.query.purview = "guest";
@@ -140,9 +120,6 @@ let checkUserPurview = (req, res, next) => {
         });
     }
 }
-
-
-
 
 // compatible post body
 router.use(['/link', '/route'], (req, res, next) => {
