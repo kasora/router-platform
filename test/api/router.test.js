@@ -234,7 +234,6 @@ describe('check user part.', () => {
 
     it('user update by themselves.', async function () {
         let tempInfo = JSON.parse(JSON.stringify(guestInfo));
-        console.log(tempInfo);
         await signup(tempInfo);
 
         tempInfo.name = "updateguest";

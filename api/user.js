@@ -169,10 +169,10 @@ let updateUser = (req, res) => {
     name: req.query.name,
     password: req.query.password,
   }
-  console.log(userInfo);
   database.updateUserByEmail(req.query.email, userInfo).then((result) => {
     database.getUserByEmail(req.query.email).then((userResult) => {
       database.getTokenByUid(userResult._id).then((tokenResult) => {
+        console.log(result);
         let resText = {
           _id: userResult._id,
           email: userResult.email,
