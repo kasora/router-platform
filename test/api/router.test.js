@@ -32,14 +32,14 @@ fakeadmin.email = "fake@kasora.moe";
 
 let agent = request.agent(app);
 
-function signup(_userInfo) {
+async function signup(_userInfo) {
     let userInfo = {
-        name: _userInfo.name || 'unknown',
+        name: _userInfo.name,
         email: _userInfo.email,
         password: _userInfo.passwordMD5,
     }
     forTest.addUser(userInfo);
-    login(userInfo);
+    await login(_userInfo);
 }
 function login(userInfo) {
     let params = `email=${userInfo.email}&password=${userInfo.passwordMD5}`;
@@ -128,26 +128,6 @@ describe('check user part.', () => {
             .expect(200);
     });
 
-    it('user sign up.', async function () {
-        let info = await signup(guestInfo);
-        assert(info.body.email === guestInfo.email);
-        assert(info.body.name === guestInfo.name);
-
-        await remove(guestInfo);
-    });
-
-    it('user sign up without name.', async function () {
-        let temp = guestInfo.name;
-        guestInfo.name = undefined;
-
-        let info = await signup(guestInfo);
-        assert(info.body.email === guestInfo.email);
-        assert(info.body.name === "unknown");
-
-        guestInfo.name = temp;
-        await remove(guestInfo);
-    });
-
     it('user sign up on the same email.', async function () {
         await signup(guestInfo);
         try {
@@ -164,6 +144,8 @@ describe('check user part.', () => {
         await signup(guestInfo);
         let info = await login(guestInfo);
         assert(info.body.email === guestInfo.email);
+        console.log(info.body.name);
+        console.log(guestInfo.name);
         assert(info.body.name === guestInfo.name);
 
         await remove(guestInfo);

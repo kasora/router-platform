@@ -74,7 +74,7 @@ let logout = (req, res) => {
     res.status(204).send({});
 }
 
-router.get('login', checkUserInfo);
+router.get('/login', checkUserInfo);
 router.get('/login', checkPassword);
 
 router.get('/login', login);
