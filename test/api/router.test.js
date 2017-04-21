@@ -144,8 +144,6 @@ describe('check user part.', () => {
         await signup(guestInfo);
         let info = await login(guestInfo);
         assert(info.body.email === guestInfo.email);
-        console.log(info.body.name);
-        console.log(guestInfo.name);
         assert(info.body.name === guestInfo.name);
 
         await remove(guestInfo);
