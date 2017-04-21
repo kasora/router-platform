@@ -173,14 +173,16 @@ let updateUser = (req, res) => {
   database.updateUserByEmail(req.query.email, userInfo).then((result) => {
     database.getUserByEmail(req.query.email).then((userResult) => {
       database.getTokenByUid(userResult._id).then((tokenResult) => {
-        res.status(201).send({
+        let resText = {
           _id: userResult._id,
           email: req.query.email,
           name: userInfo.name,
           purview: userResult.purview,
           token: tokenResult.token,
           tokenDispose: tokenResult.dispose,
-        });
+        }
+        console.log(resText);
+        res.status(201).send(resText);
       });
     }, (err) => {
       if (err === "userinfo error.") {
