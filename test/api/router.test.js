@@ -239,10 +239,8 @@ describe('check user part.', () => {
         tempInfo.name = "updateguest";
         tempInfo.password = randomstring.generate();
         tempInfo.passwordMD5 = md5(tempInfo.password);
-        console.log(tempInfo);
         await userUpdate(tempInfo);
-        let info = await login(tempInfo);
-        console.log(info.body);    
+        let info = await login(tempInfo);   
         assert(info.body.name === tempInfo.name);
 
         await remove(tempInfo);

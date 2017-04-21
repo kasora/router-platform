@@ -288,11 +288,11 @@ let updateUserById = (id, userInfo) => {
 let updateUserByEmail = (email, userInfo) => {
     return getCollection(config.user).then(({ db, collection }) => {
         return new Promise((resolve, reject) => {
+            console.log(userInfo);
             collection.updateOne({ email }, {
                 $set: {
                     name: userInfo.name,
                     password: userInfo.password,
-                    checked: userInfo.checked,
                 }
             }, function (err, result) {
                 if (err) {
