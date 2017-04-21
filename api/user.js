@@ -175,8 +175,8 @@ let updateUser = (req, res) => {
       database.getTokenByUid(userResult._id).then((tokenResult) => {
         let resText = {
           _id: userResult._id,
-          email: req.query.email,
-          name: userInfo.name,
+          email: userResult.email,
+          name: userResult.name,
           purview: userResult.purview,
           token: tokenResult.token,
           tokenDispose: tokenResult.dispose,
