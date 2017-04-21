@@ -242,6 +242,8 @@ describe('check user part.', () => {
 
         await userUpdate(tempInfo);
         let info = await login(tempInfo);
+        console.log(info.body.name);
+        console.log(tempInfo.name);        
         assert(info.body.name === tempInfo.name);
 
         await remove(tempInfo);
