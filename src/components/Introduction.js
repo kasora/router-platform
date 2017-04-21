@@ -11,7 +11,7 @@ class Introduction extends Component {
 
   render() {
     return (
-      <div className="col-lg-4">
+      <div id="introduction" className="col-lg-4">
         <div className="bs-component">
           <h2>连接跳转平台</h2>
           <p>在平台中，您可以自由的上传链接，平台会为你提供一个独一无二的标签。</p>
