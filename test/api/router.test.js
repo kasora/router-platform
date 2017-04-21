@@ -234,16 +234,16 @@ describe('check user part.', () => {
 
     it('user update by themselves.', async function () {
         let tempInfo = JSON.parse(JSON.stringify(guestInfo));
+        console.log(tempInfo);
         await signup(tempInfo);
 
         tempInfo.name = "updateguest";
         tempInfo.password = randomstring.generate();
         tempInfo.passwordMD5 = md5(guestInfo.password);
-
+        console.log(tempInfo);
         await userUpdate(tempInfo);
         let info = await login(tempInfo);
-        console.log(info.body.name);
-        console.log(tempInfo.name);        
+        console.log(info.body);    
         assert(info.body.name === tempInfo.name);
 
         await remove(tempInfo);
