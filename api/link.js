@@ -79,10 +79,25 @@ let removeLink = (req, res) => {
     });
 }
 let updateLink = (req, res) => {
-    database.getLinkById(req.query._linkid).then((linkResult) => {
-        database.updateLinkById(req.query._linkid, req.query.newlink).then((result) => {
-            res.status(201).send(linkResult);
+    if (!req.query.newlink) {
+        return res.status(400).send({
+            err: "link error.",
         });
+    }
+    database.getLinkById(req.query._linkid).then((linkResult) => {
+        database.getLinksByUid(linkResult._uid, 0, 100000000).then((links) => {
+            for (let element of links) {
+                if (req.query.newlink.search(element._id.toString()) != -1) {
+                    return res.status(400).send({
+                        err: "link error.",
+                    });
+                }
+            }
+            database.updateLinkById(req.query._linkid, req.query.newlink).then((result) => {
+                res.status(201).send(linkResult);
+            });
+        })
+
     }, (err) => {
         res.status(500).send({ err: "database error." });
     });

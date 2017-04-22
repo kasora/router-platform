@@ -96,6 +96,9 @@ class Links extends Component {
     this.state.links[offset].link = event.target.value;
 
     let row = event.target.parentNode.parentNode;
+    row.classList.remove("danger");
+    row.classList.remove("warning");
+    row.classList.remove("success");
     row.classList.add("info");
 
     this.setState();
