@@ -128,18 +128,6 @@ describe('check user part.', () => {
             .expect(200);
     });
 
-    it('user sign up on the same email.', async function () {
-        await signup(guestInfo);
-        try {
-            await signup(guestInfo)
-            assert(false);
-        }
-        catch (err) {
-        }
-
-        await remove(guestInfo);
-    });
-
     it('user login.', async function () {
         await signup(guestInfo);
         let info = await login(guestInfo);
