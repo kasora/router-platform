@@ -2,6 +2,7 @@ Router Platform
 ===============
 
 [![Build Status](https://travis-ci.org/kasora/router-platform.svg?branch=master)](https://travis-ci.org/kasora/router-platform)
+[![Coverage Status](https://coveralls.io/repos/github/kasora/router-platform/badge.svg?branch=master)](https://coveralls.io/github/kasora/router-platform?branch=master)
 
 [目前可以查看的版本](https://route.kasora.moe/)
 
