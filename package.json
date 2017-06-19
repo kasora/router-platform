@@ -4,8 +4,8 @@
   "description": "route and count your link here.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha ./test/ --recursive --compilers js:babel-core/register",
-    "cover": "COVERALLS_SERVICE_NAME=router-platform COVERALLS_REPO_TOKEN=mP2bBw0CZEdOLgsRr9a2ebfbc2GYwMyCO ./node_modules/.bin/istanbul cover --report lcovonly ./node_modules/mocha/bin/_mocha -- ./test/ --recursive && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "test": "mocha ./test/ --recursive --timeout 999999",
+    "cover": "COVERALLS_SERVICE_NAME=router-platform COVERALLS_REPO_TOKEN=mP2bBw0CZEdOLgsRr9a2ebfbc2GYwMyCO ./node_modules/.bin/istanbul cover --report lcovonly ./node_modules/mocha/bin/_mocha -- ./test/ --recursive --timeout 999999 && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
     "start": "node ./server.js"
   },
   "repository": {
