@@ -9,7 +9,7 @@
     "os": "linux",
     "services": "mongodb",
     "after_script":
-    COVERALLS_SERVICE_NAME router-platform 
-    COVERALLS_REPO_TOKEN zLdWqNN8ee2bQZyqMEd1zFs8wET2DWhSS 
+    COVERALLS_SERVICE_NAME=router-platform 
+    COVERALLS_REPO_TOKEN=zLdWqNN8ee2bQZyqMEd1zFs8wET2DWhSS 
     NODE_ENV=test ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
 }
