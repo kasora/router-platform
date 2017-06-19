@@ -8,5 +8,6 @@
     "dist": "precise",
     "os": "linux",
     "services": "mongodb"
-    "after_script": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "after_script": 
+        cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
 }
