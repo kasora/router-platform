@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Mocha Tests",
-            "program": "${workspaceRoot}/node_modules/.3.2.0@mocha/bin/_mocha",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": [
                 "--recursive",
                 "--compilers js:babel-core/register",
